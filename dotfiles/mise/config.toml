@@ -1,0 +1,8 @@
+[tools]
+oh-my-pi = { version = "latest", rename_exe = "omp" }
+pi = "latest"
+pitchfork = "latest"
+ruby = "4"
+
+[settings]
+experimental = true

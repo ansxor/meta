@@ -1,0 +1,5 @@
+{
+  "name": "config-harness",
+  "private": true,
+  "type": "module"
+}

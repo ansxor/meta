@@ -1,0 +1,7 @@
+{
+  "defaultProvider": "llama-cpp",
+  "defaultModel": "qwen3.6-27b-iq2m",
+  "defaultThinkingLevel": "high",
+  "hideThinkingBlock": false,
+  "theme": "light"
+}

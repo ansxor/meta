@@ -1,0 +1,47 @@
+{
+  "providers": {
+    "openrouter": {
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-or-v1-...",
+      "models": [
+        { "id": "z-ai/glm-5.1", "name": "Z.ai: GLM 5.1" },
+        { "id": "moonshotai/kimi-k2.7-code", "name": "Kimi K2.7 Code" }
+      ]
+    },
+    "opencode-zen": {
+      "baseUrl": "https://opencode.ai/zen/v1/responses",
+      "api": "openai-responses",
+      "apiKey": "sk-...",
+      "models": [{ "id": "kimi-k2.5", "name": "Kimi K2.5" }]
+    },
+    "lm-studio": {
+      "baseUrl": "http://localhost:1234/v1",
+      "api": "openai-completions",
+      "apiKey": "none",
+      "models": [
+        { "id": "google/gemma-4-26b-a4b" },
+        { "id": "gemma-4-e4b-it" },
+        { "id": "bonsai-8b" },
+        { "id": "qwen3.6-27b-mtp" }
+      ]
+    },
+    "llama-cpp": {
+      "baseUrl": "http://localhost:8080/v1",
+      "api": "openai-completions",
+      "apiKey": "none",
+      "models": [
+        { "id": "gemma-4-12b-qat-mtp", "name": "Gemma 4 12B QAT (MTP)", "contextWindow": 32768 },
+        { "id": "LFM2-8B-A1B-GGUF" },
+        { "id": "Qwen3-14B-GGUF" },
+        { "id": "Qwen3.5-9B-GGUF" },
+        { "id": "Qwen3.5-35B-A3B-GGUF" },
+        { "id": "OmniCoder-9B-GGUF" },
+        { "id": "Qwen3.5-27B-GGUF" },
+        { "id": "gpt-oss-20b-GGUF", "reasoning": true },
+        { "id": "vibethinker-3b", "name": "VibeThinker-3B", "contextWindow": 32768, "reasoning": true },
+        { "id": "qwen3.6-27b-iq2m", "name": "Qwen3.6 27B (IQ2_M)", "contextWindow": 32768, "reasoning": true }
+      ]
+    }
+  }
+}
