@@ -6,7 +6,8 @@ let
 
   # OMP rewrites its settings, plugin registry and mise config at runtime, so
   # everything here is an out-of-store link into the repo: edits made in OMP
-  # land in dotfiles/omp and stay writable.
+  # land in dotfiles/omp and stay writable. OMP itself comes only from mise,
+  # and its self-updater is off (`update.auto: false` in config.yml).
   link = path: config.lib.file.mkOutOfStoreSymlink path;
 in
 {
@@ -14,23 +15,12 @@ in
     ".omp/agent/config.yml".source = link "${omp}/agent/config.yml";
     ".omp/agent/mcp.json".source = link "${omp}/agent/mcp.json";
 
-    ".omp/agent/extensions/herdr-omp-agent-state.ts".source =
-      link "${omp}/agent/extensions/herdr-omp-agent-state.ts";
-    ".omp/agent/extensions/orca-agent-status.ts".source =
-      link "${omp}/agent/extensions/orca-agent-status.ts";
-    ".omp/agent/extensions/orca-prefill.ts".source = link "${omp}/agent/extensions/orca-prefill.ts";
-    ".omp/agent/extensions/orca-titlebar-spinner.ts".source =
-      link "${omp}/agent/extensions/orca-titlebar-spinner.ts";
-
-    ".omp/agent/managed-skills/ratat-browser-smoke-login/SKILL.md".source =
-      link "${omp}/agent/managed-skills/ratat-browser-smoke-login/SKILL.md";
-    ".omp/agent/managed-skills/sbs2-react-message-list-rewrite/SKILL.md".source =
-      link "${omp}/agent/managed-skills/sbs2-react-message-list-rewrite/SKILL.md";
-    ".omp/agent/managed-skills/sbs2-react-port-diagnostics/SKILL.md".source =
-      link "${omp}/agent/managed-skills/sbs2-react-port-diagnostics/SKILL.md";
-
-    # Multi-file skill (SKILL.md + scripts/ + references/): link the directory.
-    ".omp/agent/managed-skills/statechart".source = link "${omp}/agent/managed-skills/statechart";
+    # Whole directories, not single files, so anything OMP or you add later
+    # (new skills, agents, extensions) lands in the repo without a rebuild.
+    ".omp/agent/agents".source = link "${omp}/agent/agents";
+    ".omp/agent/extensions".source = link "${omp}/agent/extensions";
+    ".omp/agent/managed-skills".source = link "${omp}/agent/managed-skills";
+    ".omp/agent/skills".source = link "${omp}/agent/skills";
 
     ".omp/plugins/omp-plugins.lock.json".source = link "${omp}/plugins/omp-plugins.lock.json";
 
@@ -39,21 +29,21 @@ in
     ".config/mise/config.toml".source = link "${repo}/dotfiles/mise/config.toml";
   };
 
-  # OMP (`oh-my-pi`, exposed as `omp`) and vanilla Pi (`pi`) are installed by
-  # mise from dotfiles/mise/config.toml, not by nixpkgs. This installs them at
-  # login when missing, so a fresh home needs no manual `mise install`. Only
-  # these two are installed here; run `mise install` yourself for the other
+  # OMP (`oh-my-pi`, exposed as `omp`), vanilla Pi (`pi`) and Claude Code
+  # (`claude-code`) are installed by mise from dotfiles/mise/config.toml, not
+  # by nixpkgs. This installs them at login when missing, so a fresh home needs
+  # no manual `mise install`. Only these three are installed here; run `mise install` yourself for the other
   # tools in that file. A pinned version in the config is installed too; with
   # "latest", an existing install is kept until `mise upgrade`.
   systemd.user.services.mise-install-agents = {
     Unit = {
-      Description = "Install OMP (oh-my-pi) and Pi with mise";
+      Description = "Install OMP (oh-my-pi), Pi and Claude Code with mise";
       After = [ "network-online.target" ];
       Wants = [ "network-online.target" ];
     };
     Service = {
       Type = "oneshot";
-      ExecStart = "${pkgs.mise}/bin/mise install --yes oh-my-pi pi";
+      ExecStart = "${pkgs.mise}/bin/mise install --yes oh-my-pi pi claude-code";
       Restart = "on-failure";
       RestartSec = "30s";
       Environment = [

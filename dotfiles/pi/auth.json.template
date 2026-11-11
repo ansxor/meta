@@ -4,9 +4,5 @@
     "access": "sk-or-v1-...",
     "refresh": "",
     "expires": 9007199254740991
-  },
-  "xiaomi": {
-    "type": "api_key",
-    "key": "sk-..."
   }
 }

@@ -1,7 +1,6 @@
-# Secrets — these contain API keys and OAuth tokens.
-# Copy from the corresponding .template file and fill in your keys.
+# auth.json holds OAuth tokens that Pi rewrites on refresh, so it stays local.
+# API keys in models.json and auth.json should be `!op read ...` references.
 auth.json
-models.json
 models-store.json
 
 # Pi-managed version marker — not worth tracking.

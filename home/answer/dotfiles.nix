@@ -24,10 +24,13 @@ in
 
   # Pi coding agent — tracked config files symlinked so Pi can write updates
   # (lastChangelogVersion, trust additions) back to the repo.
-  # Secret files (auth.json, models.json) stay local and are gitignored;
-  # see dotfiles/pi/.gitignore and the .template files.
+  # models.json holds no secrets (local endpoints only); a remote provider's
+  # key belongs there as `!op read op://...`, which Pi resolves through the
+  # 1Password CLI. auth.json (OAuth tokens Pi rewrites) stays local and
+  # gitignored; see auth.json.template.
   home.file = {
     ".pi/agent/settings.json".source = config.lib.file.mkOutOfStoreSymlink "${repo}/pi/settings.json";
+    ".pi/agent/models.json".source = config.lib.file.mkOutOfStoreSymlink "${repo}/pi/models.json";
     ".pi/agent/trust.json".source = config.lib.file.mkOutOfStoreSymlink "${repo}/pi/trust.json";
     ".pi/agent/extensions".source = config.lib.file.mkOutOfStoreSymlink "${repo}/pi/extensions";
     ".pi/agent/skills".source = config.lib.file.mkOutOfStoreSymlink "${repo}/pi/skills";

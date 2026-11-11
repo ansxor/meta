@@ -13,11 +13,12 @@
 let
   home = config.home.homeDirectory;
 
-  # Claude Code is the native self-updating install in ~/.local/bin, which also
-  # holds its login. The gateway's PATH only has runtimePackages, so expose it
-  # through a stable shim instead of pinning a second copy from nixpkgs.
+  # Claude Code is installed by mise (dotfiles/mise/config.toml); its login
+  # lives in ~/.claude. The gateway's PATH only has runtimePackages, so expose
+  # it through a shim that resolves the mise install instead of pinning a
+  # second copy from nixpkgs.
   claude = pkgs.writeShellScriptBin "claude" ''
-    exec ${home}/.local/bin/claude "$@"
+    exec ${pkgs.mise}/bin/mise exec claude-code -- claude "$@"
   '';
 in
 {

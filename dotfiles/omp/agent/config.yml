@@ -91,4 +91,4 @@ compaction:
   modelThresholds:
     anthropic/claude-opus-5-5: f300000
 update:
-  auto: true
+  auto: false

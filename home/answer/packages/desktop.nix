@@ -12,6 +12,9 @@
     (callPackage ../../../pkgs/helium/package.nix { })
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
+    # Tasks
+    ticktick
+
     # Study timer
     inputs.time-timer.packages.${pkgs.stdenv.hostPlatform.system}.default
 

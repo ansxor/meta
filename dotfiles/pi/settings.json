@@ -3,5 +3,6 @@
   "defaultModel": "qwen3.6-27b-iq2m",
   "defaultThinkingLevel": "high",
   "hideThinkingBlock": false,
-  "theme": "light"
+  "theme": "light",
+  "selfUpdateCommand": ["mise", "upgrade", "pi"]
 }

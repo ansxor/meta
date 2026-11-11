@@ -1,6 +1,7 @@
 [tools]
 oh-my-pi = { version = "latest", rename_exe = "omp" }
 pi = "latest"
+claude-code = "latest"
 pitchfork = "latest"
 ruby = "4"
 

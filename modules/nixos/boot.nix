@@ -1,19 +1,5 @@
 { pkgs, ... }:
 
-let
-  # ESP shared by Arch's GRUB, Windows, and NixOS (mounted at /efi).
-  efiUuid = "D19D-D2C2";
-
-  chainload = name: class: loader: ''
-    menuentry "${name}" --class ${class} {
-      insmod part_gpt
-      insmod fat
-      insmod chain
-      search --no-floppy --fs-uuid --set=root ${efiUuid}
-      chainloader ${loader}
-    }
-  '';
-in
 {
   boot.loader = {
     efi.canTouchEfiVariables = true;
@@ -24,13 +10,7 @@ in
       enable = true;
       device = "nodev";
       efiSupport = true;
-      # os-prober cannot see Arch: it has no btrfs-subvolume support, and Arch
-      # keeps its kernels in /boot inside the @ subvolume. Chainload the
-      # bootloaders on the ESP instead.
       useOSProber = false;
-      extraEntries =
-        chainload "Arch Linux" "arch" "/EFI/GRUB/grubx64.efi"
-        + chainload "Windows Boot Manager" "windows" "/EFI/Microsoft/Boot/bootmgfw.efi";
       configurationLimit = 10;
       gfxmodeEfi = "1920x1080";
     };

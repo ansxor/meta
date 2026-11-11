@@ -38,7 +38,7 @@ scripts/                      # check, switch, build-wivrn-apk
 ./scripts/check.sh            # nix flake check (evaluation, formatting)
 nix fmt                       # format with the pinned nixfmt
 ./scripts/switch.sh           # nixos-rebuild switch; also installs Flatpaks
-mise install                  # other tools in dotfiles/mise (OMP and Pi install themselves)
+mise install                  # other tools in dotfiles/mise (OMP, Pi and Claude Code install themselves)
 ```
 
 Build without activating:
@@ -82,3 +82,4 @@ Flatpaks are declared with nix-flatpak in `home/answer/packages/flatpaks.nix`.
 
 - [Configuration harness](docs/config-harness.md)
 - [FL Studio under Wine](docs/fl-studio.md)
+- [Storage and backups](docs/storage.md)

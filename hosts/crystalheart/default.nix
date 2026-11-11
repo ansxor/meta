@@ -6,6 +6,7 @@
     ./disks.nix
 
     ../../modules/nixos/common.nix
+    ../../modules/nixos/backup.nix
     ../../modules/nixos/boot.nix
     ../../modules/nixos/desktop.nix
     ../../modules/nixos/dns-block.nix
