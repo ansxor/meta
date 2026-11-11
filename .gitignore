@@ -3,7 +3,5 @@ result-*
 .direnv
 .hm-backup
 
-# Pi config-harness runtime state
-.pi/shadow.git/
-.pi/config-harness/
-.pi/compaction.md
+# Pi project-local extensions and runtime state
+.pi/
