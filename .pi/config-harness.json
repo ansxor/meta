@@ -17,8 +17,7 @@
   "secretDenyPatterns": [
     "*.env",
     "*.key",
-    "*.age",
-    "dotfiles/omp/agent/managed-skills/ratat-browser-smoke-login/**"
+    "*.age"
   ],
   "check": {
     "command": "./scripts/check.sh",

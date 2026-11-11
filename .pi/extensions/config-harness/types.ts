@@ -103,7 +103,6 @@ export const HARD_DENY_PATTERNS = [
 	"*.env",
 	"*.key",
 	"*.age",
-	"dotfiles/omp/agent/managed-skills/ratat-browser-smoke-login/**",
 ] as const;
 
 export const DEFAULT_CONFIG: HarnessConfig = {

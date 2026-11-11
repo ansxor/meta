@@ -94,8 +94,7 @@ working state; raw history is the fallback for details.
 
 `.pi/config-harness.json` holds defaults and may be edited by hand. It is not
 model-maintained; the model is instructed not to change it. The hard secret
-deny-list (`*.env`, `*.key`, `*.age`, and the ratat-browser smoke-login tree) is
-also compiled into the extension, so it cannot be removed by config. Denied
+deny-list (`*.env`, `*.key` and `*.age`) is also compiled into the extension, so it cannot be removed by config. Denied
 paths are excluded from both injected context and shadow snapshots.
 
 ```json
