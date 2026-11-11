@@ -1,7 +1,6 @@
-# CrystalHeart — NixOS configuration
+# answer's Nix config
 
-NixOS configuration for the desktop formerly running Arch Linux, with a Home
-Manager profile for the `answer` user.
+Manages my desktop and Macbook. Maybe you'll find a fix to a thing you care about?
 
 ## What is here
 
@@ -49,34 +48,6 @@ nix build .#nixosConfigurations.crystalheart.config.system.build.toplevel -o res
 
 New files must be tracked by git (`git add -N <file>`): the flake is evaluated
 from the git tree and ignores untracked files.
-
-## Packages that are not in nixpkgs
-
-Local packages live in `pkgs/` and are added in `home/answer/packages/` or the
-NixOS modules: Archipelago (writable data-dir wrapper), BizHawk, Claude
-Desktop, ETS2 Local Radio, FL Studio (launcher and PipeASIO; Wine 11.21 from a pinned second nixpkgs), Helium, HushMic and the `hid-logitech-dd` kernel module.
-
-Other packages come from external flakes, because nixpkgs doesn't have them:
-
-- Zen Browser, from `github:youwen5/zen-browser-flake`;
-- Time Timer (libadwaita), from
-  `git+https://tangled.org/ansxor.ca/time-timer-adwaita`;
-- WiVRn (fork), from `git+https://git.shsbs.xyz/ansxor/wivrn`;
-- the Logitech TrueForce driver, from
-  `github:mescon/logitech-trueforce-linux-driver`;
-- BizHawk's own Nix expression, from `github:TASEmulators/BizHawk`;
-- a second, pinned nixpkgs for Wine 11.21 (`nixpkgs-wine`), used only by FL Studio.
-
-Flatpaks are declared with nix-flatpak in `home/answer/packages/flatpaks.nix`.
-
-## Known gaps
-
-- No CachyOS BORE-LTO kernel: nix-cachyos-kernel's binary cache is offline,
-  so the config uses Zen plus `scx_lavd` and the CachyOS `ananicy-cpp` rules.
-- Secrets, SSH/GPG keys, and app data stay in the preserved `/home`; only
-  non-secret dotfiles and local test fixtures are in `dotfiles/`.
-- VirtualBox host support is omitted; nixpkgs VirtualBox 7.2.20 fails to build
-  with `-Werror` in this revision. Use libvirt/QEMU.
 
 ## Docs
 
