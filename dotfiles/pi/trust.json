@@ -1,3 +1,7 @@
 {
-  "/home/answer/Workspace/nix-config": true
+  "/home/answer/Workspace/nix-config": true,
+  "/Users/darien/Workspace/meta": true,
+  "/Users/darien/Workspace/ratat": true,
+  "/Users/darien/Workspace/ratat-app": true,
+  "/Users/darien/Workspace/stackproto-app": true
 }

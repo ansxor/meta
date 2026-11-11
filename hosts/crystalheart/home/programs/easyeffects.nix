@@ -2,7 +2,7 @@
 
 let
   json = pkgs.formats.json { };
-  presetDir = ../../../dotfiles/easyeffects/presets;
+  presetDir = ../../../../dotfiles/easyeffects/presets;
 
   presets = {
     Edifier = (lib.importJSON "${presetDir}/Edifier.json").output;

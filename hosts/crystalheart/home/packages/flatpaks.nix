@@ -19,7 +19,7 @@
       {
         name = "vintagestory";
         location = "https://flatpak.vintagestory.at/repo/";
-        gpg-import = "${../../../dotfiles/flatpak/vintagestory.gpg}";
+        gpg-import = "${../../../../dotfiles/flatpak/vintagestory.gpg}";
       }
     ];
 

@@ -79,7 +79,7 @@ the call. On approval it rewrites the command to put a `sudo` shim first on
 `SUDO_ASKPASS` to a helper that runs `zenity --password`; the shim execs the
 real sudo with `-A`. The password goes only from Zenity to sudo; it is never
 read, logged, stored in notes, or added to shadow snapshots. `zenity` is
-declared in `home/answer/packages/desktop.nix`, so activation works after the
+declared in `hosts/crystalheart/home/packages/desktop.nix`, so activation works after the
 next switch. On a system where it is not installed yet (including the first
 activation), start Pi inside `nix shell nixpkgs#zenity` or install it manually;
 otherwise the gate fails closed.
@@ -99,7 +99,7 @@ paths are excluded from both injected context and shadow snapshots.
 
 ```json
 {
-  "vitalFiles": ["flake.nix", "hosts/crystalheart/default.nix", "modules/nixos/common.nix", "home/answer/default.nix", "home/answer/dotfiles.nix", "README.md"],
+  "vitalFiles": ["flake.nix", "hosts/crystalheart/default.nix", "modules/nixos/common.nix", "hosts/crystalheart/home/default.nix", "hosts/crystalheart/home/dotfiles.nix", "README.md"],
   "notesFile": ".pi/compaction.md",
   "notesMaxBytes": 4096,
   "diffCount": 3,

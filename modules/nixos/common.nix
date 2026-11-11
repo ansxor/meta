@@ -20,7 +20,7 @@
     # and recompute the ACL mask to ---, breaking that access.
     homeMode = "710";
     # Start the user manager at boot, as Arch did, so Home Manager user
-    # services (see home/answer/programs/user-services.nix) run without a login.
+    # services (see hosts/crystalheart/home/programs/user-services.nix) run without a login.
     linger = true;
     extraGroups = [
       "wheel"
@@ -128,7 +128,7 @@
   programs.nix-ld = {
     enable = true;
     # Merged with the module's default set. hidapi: SteamControllerGyroDSU
-    # (home/answer/programs/user-services.nix). The rest are dlopened by
+    # (hosts/crystalheart/home/programs/user-services.nix). The rest are dlopened by
     # Tern's GUI (~/Downloads/Tern-*/tern/tern).
     libraries = with pkgs; [
       hidapi

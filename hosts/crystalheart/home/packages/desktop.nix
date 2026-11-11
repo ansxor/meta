@@ -9,7 +9,7 @@
     google-chrome
     floorp-bin
     firefoxpwa
-    (callPackage ../../../pkgs/helium/package.nix { })
+    (callPackage ../../../../pkgs/helium/package.nix { })
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # Tasks
@@ -19,7 +19,7 @@
     inputs.time-timer.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # Claude Desktop (official Linux .deb, see pkgs/claude-desktop)
-    (callPackage ../../../pkgs/claude-desktop/package.nix { })
+    (callPackage ../../../../pkgs/claude-desktop/package.nix { })
 
     # Password / notes / communication
     discord

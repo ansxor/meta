@@ -12,7 +12,7 @@ and turns its manual steps into local packages.
 | `pkgs/pipeasio` | [PipeASIO](https://github.com/M0n7y5/pipeasio) 1.7.0, an ASIO driver that talks to PipeWire directly, built against that Wine (a small C build). |
 | `pkgs/fl-studio` | The `fl-studio` command: prefix setup, installer, launcher and menu entry. |
 
-Wired up in `home/answer/packages/media.nix`.
+Wired up in `hosts/crystalheart/home/packages/media.nix`.
 
 **Why a second nixpkgs.** Wine 11.19, which the main `nixpkgs` lock has, cannot
 start FL Studio 2026: it stops at "The validity of the program could not be

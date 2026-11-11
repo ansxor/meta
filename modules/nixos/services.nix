@@ -41,7 +41,7 @@
   services.earlyoom.enable = true;
 
   # Flatpak runtime and portals. The apps themselves are declared per user
-  # with nix-flatpak in home/answer/packages/flatpaks.nix.
+  # with nix-flatpak in hosts/crystalheart/home/packages/flatpaks.nix.
   services.flatpak.enable = true;
 
   # OpenSSH was installed on Arch but sshd was not enabled. Keep it off.

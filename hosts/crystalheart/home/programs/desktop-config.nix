@@ -7,7 +7,7 @@
 let
   gv = lib.hm.gvariant;
 
-  wallpaper = ../../../dotfiles/wallpapers/2026-07-03-15-06-02-a.png;
+  wallpaper = ../../../../dotfiles/wallpapers/2026-07-03-15-06-02-a.png;
 in
 {
   # darkman owns org.gnome.desktop.interface color-scheme, so dconf.settings

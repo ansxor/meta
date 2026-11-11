@@ -1,21 +1,21 @@
 { config, ... }:
 
 let
-  repo = "${config.home.homeDirectory}/Workspace/nix-config/dotfiles";
+  repo = "${config.home.homeDirectory}/Workspace/meta/dotfiles";
 in
 {
   xdg.configFile = {
     # Zellij
-    "zellij/config.kdl".source = ../../dotfiles/zellij/config.kdl;
+    "zellij/config.kdl".source = ../../../dotfiles/zellij/config.kdl;
 
     # Fish customizations that are not provided by fishPlugins.
-    "fish/functions/loadenv.fish".source = ../../dotfiles/fish/functions/loadenv.fish;
-    "fish/functions/jj-search.fish".source = ../../dotfiles/fish/functions/jj-search.fish;
-    "fish/functions/deno-doc-npm.fish".source = ../../dotfiles/fish/functions/deno-doc-npm.fish;
+    "fish/functions/loadenv.fish".source = ../../../dotfiles/fish/functions/loadenv.fish;
+    "fish/functions/jj-search.fish".source = ../../../dotfiles/fish/functions/jj-search.fish;
+    "fish/functions/deno-doc-npm.fish".source = ../../../dotfiles/fish/functions/deno-doc-npm.fish;
     "fish/functions/deno-doc-npm-render.jq".source =
-      ../../dotfiles/fish/functions/deno-doc-npm-render.jq;
-    "fish/conf.d/fish_frozen_theme.fish".source = ../../dotfiles/fish/conf.d/fish_frozen_theme.fish;
-    "fish/conf.d/moonbit.fish".source = ../../dotfiles/fish/conf.d/moonbit.fish;
+      ../../../dotfiles/fish/functions/deno-doc-npm-render.jq;
+    "fish/conf.d/fish_frozen_theme.fish".source = ../../../dotfiles/fish/conf.d/fish_frozen_theme.fish;
+    "fish/conf.d/moonbit.fish".source = ../../../dotfiles/fish/conf.d/moonbit.fish;
 
     # LazyVim writes lazy-lock.json, so point at the repo instead of the store.
     # The repo must be cloned at this path on the installed system.
