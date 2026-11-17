@@ -1,0 +1,10 @@
+# Plugin dependencies are installed by OpenCode, not tracked.
+node_modules
+package.json
+package-lock.json
+bun.lock
+
+# Runtime state and secrets stay local.
+service.json
+.opencode.json
+*.bak

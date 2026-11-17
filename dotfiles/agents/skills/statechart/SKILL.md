@@ -1,6 +1,6 @@
 ---
 name: statechart
-description: "Check a TLA+ model of a system that moves between states, such as a product flow, a protocol, or a service, and draw it as a Mermaid statechart. The report gives the shortest path to each state that breaks a rule. Use for /skill:statechart, or to show a bug as a path through states."
+description: "Check a TLA+ model of a system that moves between states, such as a product flow, a protocol, or a service, and draw it as a Mermaid statechart. The report gives the shortest path to each state that breaks a rule. Use to show a bug as a path through states."
 disable-model-invocation: true
 ---
 
@@ -10,15 +10,13 @@ The chart shows how a system moves between states, in the words of the person wh
 
 ## Run
 
-Work in a scratch folder outside the repo (for example under `/tmp`). Write a TLA+ spec and its config. Then run it with `bash`. `<skill dir>` is the `[Skill directory: ...]` that OMP gives when the skill loads, or the directory of `skill://statechart`:
+Work in a scratch folder outside the repo (for example under `/tmp`). Write a TLA+ spec and its config. Then run it with the shell:
 
 ```sh
-<skill dir>/scripts/statechart SPEC.tla [--config FILE] [--view FILE] [--out DIR]
+statechart SPEC.tla [--config FILE] [--view FILE] [--out DIR]
 ```
 
-`scripts/statechart.ts` is TypeScript, so run it with a runtime that can execute TypeScript.
-
-The first run installs TLC and Java with mise and needs the network.
+`statechart` is a Nix package (`pkgs/statechart` in the nix-config repo) that bundles Node, TLC and Java, so it needs no network. When it is not on `PATH`, run it with `nix run ~/Workspace/nix-config#statechart -- SPEC.tla ...`.
 
 ## Write the spec
 
@@ -71,7 +69,7 @@ Aim for about 20 arrows or fewer, because a busier chart is hard to read. First 
 
 ## Show the chart
 
-Read `chart.mmd` and show it to the user in the final reply as a `mermaid` code block (OMP renders these; do not also draw it as an `svg` block). The chart has a budget of 500 states, counted by TLC on the config as written. Above that, the chart draws only the paths to the rules that break, and when no rule breaks, the command writes no `chart.mmd`. It still checks each rule, and the report gives the state count and each bug path. To see the whole graph, make the model smaller.
+Read `chart.mmd` and show it to the user in the final reply as a `mermaid` code block (do not also draw it as an `svg` block). The chart has a budget of 500 states, counted by TLC on the config as written. Above that, the chart draws only the paths to the rules that break, and when no rule breaks, the command writes no `chart.mmd`. It still checks each rule, and the report gives the state count and each bug path. To see the whole graph, make the model smaller.
 
 Render charts with Pele. When the user asks for an image, or a chart is too large to read as text, follow `references/render.md`. Do not use a different renderer unless the user asks for it.
 
@@ -79,4 +77,4 @@ Render charts with Pele. When the user asks for an image, or a chart is too larg
 
 Give each chart and its Mermaid text to the person who must decide. Add one line for each bug: the rule, the reader's sentence for that rule, and the path as the report numbers it. Say what the model leaves out. Give the command that makes the files again, with a new `--out` folder.
 
-When the model describes code, replay each bug path against the real code, as a regression test or a live repro (OMP's smoke-run rule applies: observe the bug before and its absence after a fix), one step for each action. If a bug does not occur, think that the model is wrong until you show that it is not.
+When the model describes code, replay each bug path against the real code, as a regression test or a live repro (observe the bug before and its absence after a fix), one step for each action. If a bug does not occur, think that the model is wrong until you show that it is not.

@@ -30,6 +30,9 @@
       ];
     })
     atlauncher
+    runelite
+    # Third-party Jagex launcher for Linux (Jagex account login; launches RuneLite/RS3).
+    bolt-launcher
     protontricks
     mangohud
     goverlay

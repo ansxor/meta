@@ -33,7 +33,6 @@ in
     ".pi/agent/models.json".source = config.lib.file.mkOutOfStoreSymlink "${repo}/pi/models.json";
     ".pi/agent/trust.json".source = config.lib.file.mkOutOfStoreSymlink "${repo}/pi/trust.json";
     ".pi/agent/extensions".source = config.lib.file.mkOutOfStoreSymlink "${repo}/pi/extensions";
-    ".pi/agent/skills".source = config.lib.file.mkOutOfStoreSymlink "${repo}/pi/skills";
     ".pi/agent/prompts".source = config.lib.file.mkOutOfStoreSymlink "${repo}/pi/prompts";
     ".pi/agent/themes".source = config.lib.file.mkOutOfStoreSymlink "${repo}/pi/themes";
   };

@@ -16,11 +16,9 @@ in
     ".omp/agent/mcp.json".source = link "${omp}/agent/mcp.json";
 
     # Whole directories, not single files, so anything OMP or you add later
-    # (new skills, agents, extensions) lands in the repo without a rebuild.
+    # (new agents, extensions) lands in the repo without a rebuild.
     ".omp/agent/agents".source = link "${omp}/agent/agents";
     ".omp/agent/extensions".source = link "${omp}/agent/extensions";
-    ".omp/agent/managed-skills".source = link "${omp}/agent/managed-skills";
-    ".omp/agent/skills".source = link "${omp}/agent/skills";
 
     ".omp/plugins/omp-plugins.lock.json".source = link "${omp}/plugins/omp-plugins.lock.json";
 
@@ -29,21 +27,22 @@ in
     ".config/mise/config.toml".source = link "${repo}/dotfiles/mise/config.toml";
   };
 
-  # OMP (`oh-my-pi`, exposed as `omp`), vanilla Pi (`pi`) and Claude Code
-  # (`claude-code`) are installed by mise from dotfiles/mise/config.toml, not
-  # by nixpkgs. This installs them at login when missing, so a fresh home needs
-  # no manual `mise install`. Only these three are installed here; run `mise install` yourself for the other
-  # tools in that file. A pinned version in the config is installed too; with
-  # "latest", an existing install is kept until `mise upgrade`.
+  # OMP (`oh-my-pi`, exposed as `omp`), vanilla Pi (`pi`), Claude Code
+  # (`claude-code`) and OpenCode (`opencode`) are installed by mise from
+  # dotfiles/mise/config.toml, not by nixpkgs. This installs them at login when
+  # missing, so a fresh home needs no manual `mise install`. Only these four are
+  # installed here; run `mise install` yourself for the other tools in that
+  # file. A pinned version in the config is installed too; with "latest", an
+  # existing install is kept until `mise upgrade`.
   systemd.user.services.mise-install-agents = {
     Unit = {
-      Description = "Install OMP (oh-my-pi), Pi and Claude Code with mise";
+      Description = "Install OMP (oh-my-pi), Pi, Claude Code and OpenCode with mise";
       After = [ "network-online.target" ];
       Wants = [ "network-online.target" ];
     };
     Service = {
       Type = "oneshot";
-      ExecStart = "${pkgs.mise}/bin/mise install --yes oh-my-pi pi claude-code";
+      ExecStart = "${pkgs.mise}/bin/mise install --yes oh-my-pi pi claude-code opencode";
       Restart = "on-failure";
       RestartSec = "30s";
       Environment = [

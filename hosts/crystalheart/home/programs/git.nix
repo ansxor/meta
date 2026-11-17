@@ -1,32 +1,25 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
   programs.git = {
     enable = true;
     signing = {
-      key = "38EF7512C7FE469F";
+      key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKtsAmcwmQ6Oa6Z8nl2n+zM5ML3XZTGAjIVHF6gqgfHq";
       signByDefault = true;
-      format = "openpgp";
+      format = "ssh";
+      signer = "/run/current-system/sw/bin/op-ssh-sign";
     };
     settings = {
       user = {
-        name = "darienreese";
-        email = "git@darienreese.ca";
+        name = "ansxor";
+        email = "git@ansxor.ca";
       };
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
       tag.gpgsign = true;
       credential.helper = "store";
+      beads.role = "maintainer";
     };
-  };
-
-  programs.gpg.enable = true;
-
-  # GUI passphrase prompt for GNOME (git commit/tag signing). Home Manager
-  # runs gpg-agent as a socket-activated user service with this pinentry.
-  services.gpg-agent = {
-    enable = true;
-    pinentry.package = pkgs.pinentry-gnome3;
   };
 
   programs.gh = {

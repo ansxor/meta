@@ -25,7 +25,7 @@ against the base branch (default `main`), including the working tree.
 
 # Procedure
 
-1. **Spawn.** Call `task` with one task (default `task` agent; it needs
+1. **Spawn.** Call @spawn@ with one task (default `task` agent; it needs
    edit access). The task text is
    [`references/comment-sicko.md`](references/comment-sicko.md)
    read verbatim, then the scope. Put the scope's file list or diff
@@ -49,7 +49,7 @@ against the base branch (default `main`), including the working tree.
 
    Restore a deletion only with the exact keep-list exception and
    scoped proof. Before accepting thin `IMPORTANT` / `do not remove`
-   kills or keeps, investigate the named symbol yourself: `xd://lsp`
+   kills or keeps, investigate the named symbol yourself: @lsp@
    references, `grep` for callers and tests, `git log -S` /
    `git blame` for the introducing commit. If a kill is ambiguous,
    do not restore. If a keep is refuted or still ambiguous, delete
@@ -63,7 +63,7 @@ against the base branch (default `main`), including the working tree.
 3. **Shape.** Fix trivial accepted flags directly: delete a dead
    path, drop a parameter, use the real API. If any fix needs a new
    shape (types, boundaries, extraction), read
-   `skill://pseudocode-architecture` and spawn one
+   @skill:pseudocode-architecture@ and spawn one
    `pseudocode-planner` task for the accepted set plus surrounding
    code. Stop at its plan; step 4 implements it.
 
@@ -76,7 +76,7 @@ against the base branch (default `main`), including the working tree.
    `do not change wording`, or `talk to X before changing` claim a
    constraint. Leave keeps about things we cannot change. For the
    rest, offer the cheapest in-scope encoding: a type, runtime check,
-   test, or CI lint. Use `ask` for approval. In a non-interactive
+   test, or CI lint. Use @ask@ for approval. In a non-interactive
    run (subagent, unattended) proceed only if the caller
    pre-approved. If approved, encode then delete the comment.
    Otherwise delete it, report the constraint as unenforced, and

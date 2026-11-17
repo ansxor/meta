@@ -162,6 +162,11 @@
         system = linuxSystem;
       };
 
+      # `nix run .#statechart -- SPEC.tla`; also installed by hosts/crystalheart/home/packages/development.nix.
+      packages.${linuxSystem}.statechart =
+        nixpkgs.legacyPackages.${linuxSystem}.callPackage ./pkgs/statechart/package.nix
+          { };
+
       # `nix fmt` formats the whole tree with the pinned nixfmt.
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
 

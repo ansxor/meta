@@ -12,6 +12,9 @@
     (callPackage ../../../../pkgs/helium/package.nix { })
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
+    # LearnHarness (upstream AppImage, see pkgs/learnharness)
+    (callPackage ../../../../pkgs/learnharness/package.nix { })
+
     # Tasks
     ticktick
 

@@ -15,6 +15,9 @@
     alloy6
     jetbrains-toolbox
 
+    # Agent skill tooling (dotfiles/agents/skills/statechart)
+    (callPackage ../../../../pkgs/statechart/package.nix { })
+
     # Toolchains
     gcc
     cmake

@@ -31,7 +31,7 @@ request → pseudocode-planner (+ Alloy model) → plan → implementer → vali
   and record it in the report.
 - Public APIs are preserved unless the user's request authorizes
   changing them. Pass that authorization verbatim to both agents.
-- Read `skill://pseudocode-architecture` before starting; the
+- Read @skill:pseudocode-architecture@ before starting; the
   Validation checklist below comes from it.
 
 # Procedure
@@ -61,7 +61,7 @@ request → pseudocode-planner (+ Alloy model) → plan → implementer → vali
 
 2. **Implement.** Spawn one `implementer` task pointing
    at `local://pseudocode-plan.md` and telling it to read
-   `skill://pseudocode-architecture` (principles, Implementing,
+   @skill:pseudocode-architecture@ (principles, Implementing,
    Validation) first, repeating the API authorization. The
    implementer decides details on its own and escalates only
    deviations that would change the entry-point chain, a type, a
@@ -83,7 +83,7 @@ request → pseudocode-planner (+ Alloy model) → plan → implementer → vali
    list) until validation passes.
 
 5. **Strip comments.** As the final pass, once validation has
-   passed, run `/skill:no-comments` (read `skill://no-comments`
+   passed, run @skill:no-comments@ (read @skill:no-comments@
    and follow it) scoped to the files the refactor changed. Re-run
    the tests and static checks afterward; fix any breakage it
    causes.

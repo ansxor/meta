@@ -13,6 +13,8 @@
     ./packages/flatpaks.nix
     ./packages/gaming.nix
     ./packages/media.nix
+    ./programs/agent-skills.nix
+    ./programs/claude.nix
     ./programs/desktop-config.nix
     ./programs/easyeffects.nix
     ./programs/fish.nix
@@ -20,6 +22,7 @@
     ./programs/git.nix
     ./programs/hex.nix
     ./programs/omp.nix
+    ./programs/opencode.nix
     ./programs/openclaw.nix
     ./programs/shell-tools.nix
     ./programs/terminals.nix

@@ -42,7 +42,7 @@ request → clarify? → task-planner → plan → implementer → verify
    paths, or entry points), and how success is observed. Fill gaps
    from the repo first (`find`, `grep`, docs). If any of the three
    is still undetermined, or the request admits materially
-   different readings, use `ask` once with every open question
+   different readings, use @ask@ once with every open question
    batched, offering the concrete readings you found as options.
    Do not ask about anything the repo answers. Write the settled
    request (behavior, scope, success criteria, API authorization,
@@ -85,11 +85,11 @@ request → clarify? → task-planner → plan → implementer → verify
    other code talks to through them). Start from the plan's
    `New world` verdict and confirm it against what actually landed.
 
-   1. **No-comments, always.** Read `skill://no-comments` and follow
+   1. **No-comments, always.** Read @skill:no-comments@ and follow
       it, scoped to the changed file set. Its flags fix root causes
       in the current architecture before anything is restructured.
       Re-run the plan's Verification afterward.
-   2. **New world only:** read `skill://apply-pseudocode-architecture`
+   2. **New world only:** read @skill:apply-pseudocode-architecture@
       and follow it, scoped to the changed file set as it stands
       after step 6.1, with the same API authorization. Pass it the
       no-comments report so the planner sees the fixes already made

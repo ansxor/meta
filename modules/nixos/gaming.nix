@@ -10,6 +10,9 @@
     enable = true;
     gamescopeSession.enable = true;
     extraCompatPackages = [ pkgs.proton-ge-bin ];
+    # XIVLauncher.Core (Steam FFXIV, XLM) dlopens libsecret from inside
+    # Steam's FHS environment, where nix-ld's library set is not visible.
+    extraPackages = [ pkgs.libsecret ];
   };
 
   programs.gamemode.enable = true;

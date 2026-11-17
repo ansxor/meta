@@ -2,7 +2,7 @@
 name: brainstorm-pseudocode-architecture
 description: >
   Interactive pseudocode-architecture refactor: discover the codebase,
-  propose the architecture as a pseudocode-spec sketch, iterate on it
+  propose the architecture as a short pseudocode sketch, iterate on it
   with the user, and only after explicit agreement hand it to the
   implementer agent. Use when the user wants to discuss,
   review, or shape architectural improvements, codebase
@@ -14,13 +14,12 @@ description: >
 
 Reach an architecture the user has explicitly agreed to, then have
 it implemented. The design conversation happens at the conceptual
-level, in the `pseudocode-spec` dialect, before any code changes.
+level, as a pseudocode sketch, before any code changes.
 
 # Before Starting
 
-Read `skill://pseudocode-architecture` (the principles, the design
-procedure, the implementation plan format, validation) and
-`skill://pseudocode-spec` (the dialect proposals are written in).
+Read @skill:pseudocode-architecture@ (the principles, the design
+procedure, the implementation plan format, validation).
 
 # Procedure
 
@@ -29,8 +28,8 @@ procedure, the implementation plan format, validation) and
    complexity, design the simplified architecture).
 
 2. **Propose and review (stop here before implementing).**
-   - Write the proposal in the `pseudocode-spec` dialect (see
-     Proposing the Architecture below).
+   - Write the proposal as a pseudocode sketch (see Proposing the
+     Architecture below).
    - Present it to the user and ask whether they agree with the
      architecture and where it could be improved.
    - Iterate on the sketch with the user: revise the types,
@@ -44,13 +43,12 @@ procedure, the implementation plan format, validation) and
    `pseudocode-architecture`, in the project's language with real
    paths and symbols. Every decision made in the discussion goes
    into the plan; only genuine details stay under Open details.
-   Append the agreed sketch verbatim as an appendix, noting that
-   `skill://pseudocode-spec` defines its notation. Save the plan
+   Append the agreed sketch verbatim as an appendix. Save the plan
    to `local://pseudocode-plan.md`.
 
 4. **Implement.** Spawn the `implementer` agent with a
    task that points at `local://pseudocode-plan.md`, tells it to
-   read `skill://pseudocode-architecture` (principles,
+   read @skill:pseudocode-architecture@ (principles,
    Implementing, Validation) first, and states the user's
    authorization scope (which public APIs may change).
    Answer its escalations yourself when the agreed design already
@@ -71,36 +69,19 @@ procedure, the implementation plan format, validation) and
 
 # Proposing the Architecture
 
-Architecture proposals are communicated in the `pseudocode-spec`
-dialect, so the user can judge the design at the conceptual level
-before any code changes. Follow that skill's rules: keep the
-sketch short, show only what is under discussion, collapse
-unchanged parts to `-- unchanged`, and hide fiddly logic behind
-names.
+Architecture proposals are communicated as a short pseudocode
+sketch, so the user can judge the design at the conceptual level
+before any code changes. Keep the sketch short, show only what is
+under discussion, collapse unchanged parts to `-- unchanged`, and
+hide fiddly logic behind names. Use plain, language-neutral
+pseudocode: types with the messages they understand, signatures
+without bodies.
 
-A "protocol" in `pseudocode-architecture` is a typeclass in
-pseudocode-spec. Two conventions are specific to these proposals:
-
-- **A mediator is a `record`** that holds its peers and the state
-  of their interaction (routing, ordering, buffering). Peers send
-  messages to it in dot form, and what it guarantees between them
-  is stated in the record itself: an `invariant` for what holds at
-  every point, a named `property` with a temporal pragma for what
-  holds over time.
-- **A mediator's peers are typeclasses**, so its testing seam is
-  visible in the sketch; fakes appear as `instance Peer[Fake_Peer]`.
-
-```
-type Bus[C: Bus_Master, D: Device] = record
-  cpu:     C
-  devices: seq[D]
-  pending: …                      -- arbitration state
-invariant devices.ranges_disjoint
-property served[r in requests] {.leads_to: r.issued, r.answered.}
-end record
-
-proc read(b: Bus, at: Address): Word {.raises: [Unmapped].}
-```
+A mediator is a type that holds its peers and the state of their
+interaction (routing, ordering, buffering). Peers send messages to
+it in dot form, and what it guarantees between them is stated next
+to it. Its peers are protocols (interfaces), so its testing seam is
+visible in the sketch.
 
 A proposal contains, in this order:
 

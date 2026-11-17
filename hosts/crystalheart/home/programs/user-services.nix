@@ -32,14 +32,47 @@ let
     "${home}/.nix-profile/bin"
     "${home}/.npm-global/bin"
     "${home}/.bun/bin"
-    "${home}/.opencode/bin"
     "${home}/.cargo/bin"
     "${home}/go/bin"
     "${home}/.local/share/pnpm/bin"
   ];
   basePath = lib.concatStringsSep ":" (systemPath ++ homePath);
+
+  # Menu launches must run as a systemd service named app-gnome-steam@<x>, like
+  # the autostart unit below: that name gives xdg-desktop-portal the app id
+  # "steam", so the saved RemoteDesktop approval applies. A scope does not
+  # work; Steam ends up back under gnome-shell's cgroup. -pipewire is the flag
+  # the old hand-written steam.desktop passed.
+  steamLauncher = pkgs.writeShellScript "steam-launcher" ''
+    steam=/run/current-system/sw/bin/steam
+    if systemctl --user --quiet is-active app-gnome-steam@autostart.service app-gnome-steam@desktop.service; then
+      exec "$steam" "$@"
+    fi
+    exec systemd-run --user --quiet --collect --slice=app.slice \
+      --unit=app-gnome-steam@desktop.service \
+      -p Type=exec -p KillMode=process \
+      "$steam" -pipewire "$@"
+  '';
 in
 {
+  xdg.desktopEntries.steam = {
+    name = "Steam";
+    comment = "Application for managing and playing games on Steam";
+    exec = "${steamLauncher} %U";
+    icon = "steam";
+    terminal = false;
+    categories = [
+      "Network"
+      "FileTransfer"
+      "Game"
+    ];
+    mimeType = [
+      "x-scheme-handler/steam"
+      "x-scheme-handler/steamlink"
+    ];
+    settings.PrefersNonDefaultGPU = "true";
+  };
+
   systemd.user.services = {
     # ~/Downloads/Tern-*/tern — remote session daemon. The session daemon it
     # spawns outlives the unit, hence KillMode=process. Not started at login:
