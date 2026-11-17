@@ -16,11 +16,9 @@ in
     ".omp/agent/mcp.json".source = link "${omp}/agent/mcp.json";
 
     # Whole directories, not single files, so anything OMP or you add later
-    # (new skills, agents, extensions) lands in the repo without a rebuild.
+    # (new agents, extensions) lands in the repo without a rebuild.
     ".omp/agent/agents".source = link "${omp}/agent/agents";
     ".omp/agent/extensions".source = link "${omp}/agent/extensions";
-    ".omp/agent/managed-skills".source = link "${omp}/agent/managed-skills";
-    ".omp/agent/skills".source = link "${omp}/agent/skills";
 
     ".omp/plugins/omp-plugins.lock.json".source = link "${omp}/plugins/omp-plugins.lock.json";
 

@@ -13,7 +13,7 @@
     ./packages/flatpaks.nix
     ./packages/gaming.nix
     ./packages/media.nix
-    ./programs/agent-skills.nix
+    ../../../modules/home/agent-skills.nix
     ./programs/claude.nix
     ./programs/desktop-config.nix
     ./programs/easyeffects.nix

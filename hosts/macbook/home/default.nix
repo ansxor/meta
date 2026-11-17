@@ -8,6 +8,7 @@
     ./packages/cli.nix
     ./packages/development.nix
     ./packages/media.nix
+    ../../../modules/home/agent-skills.nix
     ./programs/fish.nix
     ./programs/git.nix
     ./programs/omp.nix

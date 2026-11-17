@@ -20,7 +20,7 @@
 # build. Output is read-only store files, so editing a skill needs a rebuild.
 # To add a harness, add an entry below.
 let
-  root = ../../../../dotfiles/agents/skills;
+  root = ../../dotfiles/agents/skills;
 
   harnesses = {
     omp = {
