@@ -2,9 +2,12 @@
 oh-my-pi = { version = "latest", rename_exe = "omp" }
 pi = "latest"
 claude-code = "latest"
+codex = "latest"
 opencode = "2"
 pitchfork = "latest"
 ruby = "4"
 
 [settings]
 experimental = true
+# Coding agents ship near-daily; don't hold them back behind the release-age delay.
+minimum_release_age_excludes = ["oh-my-pi", "pi", "claude-code", "codex", "opencode"]

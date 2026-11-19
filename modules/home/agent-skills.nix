@@ -51,6 +51,15 @@ let
       lsp = "the `lsp` tool";
       skill = name: "the `${name}` skill";
     };
+    # ~/.codex/skills rather than ~/.agents/skills: other harnesses scan the
+    # latter too, which would list every skill twice.
+    codex = {
+      dir = ".codex/skills";
+      spawn = "`spawn_agent`";
+      ask = "`request_user_input`";
+      lsp = "the language server";
+      skill = name: "the `$" + name + "` skill";
+    };
   };
 
   skillNames = builtins.attrNames (builtins.readDir root);

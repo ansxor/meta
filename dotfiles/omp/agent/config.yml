@@ -10,10 +10,10 @@ modelRoles:
   advisor: google-antigravity/gemini-3.8-flash:high
   task: anthropic/claude-sonnet-5-5:medium
   web: openai-codex/gpt-6-luna
-  speech: local/kokoro
+  speech: local/phonon-31m
   smol: anthropic/claude-haiku-5-5:max
   image: openrouter/openai/gpt-image-2.5-sunburst
-  default: anthropic/claude-sonnet-5-5:medium
+  default: openai-codex/gpt-6.2-sol:medium
   commit: anthropic/claude-haiku-5-5:low
   plan: anthropic/claude-opus-5-5:xhigh
 advisor:

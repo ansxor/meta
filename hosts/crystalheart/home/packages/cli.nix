@@ -85,9 +85,9 @@
     bind
     bruno
     btrfs-assistant
+    bubblewrap # Codex sandbox (codex itself comes from mise)
     cdecrypt
     chatgpt
-    codex
     codex-acp
     dnsmasq
     docker-buildx

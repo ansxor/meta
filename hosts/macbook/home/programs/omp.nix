@@ -27,8 +27,8 @@ in
     ".config/mise/config.toml".source = link "${repo}/dotfiles/mise/config.toml";
   };
 
-  # OMP (`oh-my-pi`, exposed as `omp`), vanilla Pi (`pi`) and Claude Code
-  # (`claude-code`) are installed by mise from dotfiles/mise/config.toml, not
+  # OMP (`oh-my-pi`, exposed as `omp`), vanilla Pi (`pi`), Claude Code
+  # (`claude-code`) and Codex (`codex`) are installed by mise from dotfiles/mise/config.toml, not
   # by nixpkgs. This installs them at login when missing, so a fresh home needs
   # no manual `mise install`.
   launchd.agents.mise-install-agents = {
@@ -41,6 +41,7 @@ in
         "oh-my-pi"
         "pi"
         "claude-code"
+        "codex"
       ];
       EnvironmentVariables = {
         PATH = "${

@@ -28,21 +28,21 @@ in
   };
 
   # OMP (`oh-my-pi`, exposed as `omp`), vanilla Pi (`pi`), Claude Code
-  # (`claude-code`) and OpenCode (`opencode`) are installed by mise from
-  # dotfiles/mise/config.toml, not by nixpkgs. This installs them at login when
-  # missing, so a fresh home needs no manual `mise install`. Only these four are
-  # installed here; run `mise install` yourself for the other tools in that
-  # file. A pinned version in the config is installed too; with "latest", an
-  # existing install is kept until `mise upgrade`.
+  # (`claude-code`), Codex (`codex`) and OpenCode (`opencode`) are installed by
+  # mise from dotfiles/mise/config.toml, not by nixpkgs. This installs them at
+  # login when missing, so a fresh home needs no manual `mise install`. Only
+  # these five are installed here; run `mise install` yourself for the other
+  # tools in that file. A pinned version in the config is installed too; with
+  # "latest", an existing install is kept until `mise upgrade`.
   systemd.user.services.mise-install-agents = {
     Unit = {
-      Description = "Install OMP (oh-my-pi), Pi, Claude Code and OpenCode with mise";
+      Description = "Install OMP (oh-my-pi), Pi, Claude Code, Codex and OpenCode with mise";
       After = [ "network-online.target" ];
       Wants = [ "network-online.target" ];
     };
     Service = {
       Type = "oneshot";
-      ExecStart = "${pkgs.mise}/bin/mise install --yes oh-my-pi pi claude-code opencode";
+      ExecStart = "${pkgs.mise}/bin/mise install --yes oh-my-pi pi claude-code codex opencode";
       Restart = "on-failure";
       RestartSec = "30s";
       Environment = [
