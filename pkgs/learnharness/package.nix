@@ -14,10 +14,17 @@ let
     hash = "sha256-uKAz63QhZ3iT2W5JiLMBU/3+T8bw3EVveUcWG7oEG5g=";
   };
 
-  contents = appimageTools.extract { inherit pname version src; };
+  contents = appimageTools.extract {
+    inherit pname version src;
+    postExtract = ''
+      patch --directory="$out" --strip=1 --fuzz=0 < ${./gpt-6.2-sol.patch}
+      patch --directory="$out" --strip=1 --fuzz=0 < ${./pi-codex-prompt-cache.patch}
+    '';
+  };
 in
-appimageTools.wrapType2 {
-  inherit pname version src;
+appimageTools.wrapAppImage {
+  inherit pname version contents;
+  passthru = { inherit src; };
 
   extraInstallCommands = ''
     install -Dm444 ${contents}/*.desktop -t $out/share/applications

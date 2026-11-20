@@ -1,0 +1,45 @@
+Backport Pi edfe6b2ef32283d31efc9e26db86fe48be19d3b2 (#12273)
+to the JavaScript bundled in LearnHarness 0.6.1.
+
+--- a/resources/server/standalone/node_modules/@earendil-works/pi-ai/dist/api/openai-codex-responses.js
++++ b/resources/server/standalone/node_modules/@earendil-works/pi-ai/dist/api/openai-codex-responses.js
+@@ -7,8 +7,7 @@
+ import { headersToRecord } from "../utils/headers.js";
+ import { getIdentityHeaders } from "../utils/identity.js";
+ import { resolveHttpProxyUrlForTarget } from "../utils/node-http-proxy.js";
+-import { getSystemMessageText } from "../utils/text.js";
+-import { getDeclaredTools, getInitialSystemMessage, normalizeContext, resolveTranscript, resolveTranscriptTools, } from "../utils/transcript.js";
++import { getDeclaredTools, normalizeContext, resolveTranscript, resolveTranscriptTools, } from "../utils/transcript.js";
+ import { uuidv7 } from "../utils/uuid.js";
+ import { createGrammarToolInputProperties } from "./constrained-sampling.js";
+ import { clampOpenAIPromptCacheKey } from "./openai-prompt-cache.js";
+@@ -384,21 +383,17 @@
+         supportsToolSearch,
+     }));
+     const messages = convertResponsesMessages(model, context, CODEX_TOOL_CALL_PROVIDERS, {
+-        includeSystemPrompt: false,
+         grammarToolInputProperties,
+         supportsMidConvoSystemMessages: model.compat?.supportsMidConvoSystemMessages ?? false,
+         supportsAdditionalTools,
+         supportsToolSearch,
+         toolOptions: { strict: null, supportsStrictMode, supportsOpenAIGrammarTools },
+     });
+-    const initialSystemMessage = getInitialSystemMessage(context.messages);
+-    const instructions = initialSystemMessage ? getSystemMessageText(initialSystemMessage) : "";
+     const body = {
+         model: model.id,
+         store: false,
+         stream: true,
+-        instructions: instructions || "You are a helpful assistant.",
+         input: messages,
+         text: { verbosity: options?.textVerbosity || "low" },
+         include: ["reasoning.encrypted_content"],
+         prompt_cache_key: cacheSessionId,
+@@ -1220,7 +1215,6 @@
+         }
+         else if (useCachedContext && entry && output.responseId) {
+             const responseItems = convertResponsesMessages(model, normalizeContext({ messages: [output] }), CODEX_TOOL_CALL_PROVIDERS, {
+-                includeSystemPrompt: false,
+                 grammarToolInputProperties,
+             }).filter((item) => item.type !== "function_call_output" && item.type !== "custom_tool_call_output");
+             entry.continuation = {

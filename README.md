@@ -63,6 +63,12 @@ nix build .#darwinConfigurations.macbook.system -o result-system
 New files must be tracked by git (`git add -N <file>`): the flake is evaluated
 from the git tree and ignores untracked files.
 
+LearnHarness applies a local GPT-6.2 Sol catalog patch to the upstream AppImage
+at build time. The ChatGPT picker still only shows models reported by the
+connected account. The package also backports the Codex prompt-caching fix for
+[Pi #12273](https://github.com/earendil-works/pi/issues/12273). Drop each patch
+once the bundled Pi version includes its change.
+
 ## Docs
 
 - [Configuration harness](docs/config-harness.md)
