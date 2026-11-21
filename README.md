@@ -69,6 +69,17 @@ connected account. The package also backports the Codex prompt-caching fix for
 [Pi #12273](https://github.com/earendil-works/pi/issues/12273). Drop each patch
 once the bundled Pi version includes its change.
 
+For HDR with Steam Input on Plasma, run Proton through nested Gamescope on
+XWayland. Leave `PROTON_ENABLE_WAYLAND` unset. The system enables Gamescope's
+Vulkan WSI layer. In the game's Steam launch options:
+
+```text
+gamescope -f --hdr-enabled -e --virtual-connector-strategy SingleApplication -- %command%
+```
+
+`SingleApplication` goes after `-e` so the nested compositor selects the game
+window instead of waiting for Steam to select it.
+
 ## Docs
 
 - [Configuration harness](docs/config-harness.md)

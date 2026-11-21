@@ -21,7 +21,10 @@
   # Steam's bubblewrap sandbox (no_new_privs), so "gamescope ... %command%"
   # launch options die with "failed to inherit capabilities". ananicy-cpp
   # below already raises gamescope's priority.
-  programs.gamescope.enable = true;
+  programs.gamescope = {
+    enable = true;
+    enableWsi = true;
+  };
 
   hardware.steam-hardware.enable = true;
 
