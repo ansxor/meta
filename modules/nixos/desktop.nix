@@ -10,6 +10,7 @@
 
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
+  programs.kde-pim.enable = false;
 
   # KDE Connect protocol through the GSConnect GNOME Shell extension.
   programs.kdeconnect = {

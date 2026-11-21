@@ -69,6 +69,9 @@ connected account. The package also backports the Codex prompt-caching fix for
 [Pi #12273](https://github.com/earendil-works/pi/issues/12273). Drop each patch
 once the bundled Pi version includes its change.
 
+CrystalHeart disables Plasma's optional KDE PIM suite (KMail, Kontact, and
+Merkuro) to avoid rebuilding mail and calendar packages when KRunner is patched.
+
 For HDR with Steam Input on Plasma, run Proton through nested Gamescope on
 XWayland. Leave `PROTON_ENABLE_WAYLAND` unset. The system enables Gamescope's
 Vulkan WSI layer. In the game's Steam launch options:
