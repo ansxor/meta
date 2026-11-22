@@ -65,12 +65,6 @@ nix build .#darwinConfigurations.macbook.system -o result-system
 New files must be tracked by git (`git add -N <file>`): the flake is evaluated
 from the git tree and ignores untracked files.
 
-Shared agent skills live in `dotfiles/agents/skills/`. Home Manager installs
-new skill directories for OMP, Claude Code, Pi, OpenCode, Codex, and Antigravity
-on switch, unless a skill's `meta.nix` restricts its harnesses. Antigravity reads
-them from `~/.gemini/config/skills/`. On CrystalHeart, launch the desktop app
-with `antigravity` and view active skills under **Settings → Projects → Customizations**.
-
 LearnHarness applies a local GPT-6.2 Sol catalog patch to the upstream AppImage
 at build time. The ChatGPT picker still only shows models reported by the
 connected account. The package also backports the Codex prompt-caching fix for
@@ -90,6 +84,14 @@ gamescope -f --hdr-enabled -e --virtual-connector-strategy SingleApplication -- 
 
 `SingleApplication` goes after `-e` so the nested compositor selects the game
 window instead of waiting for Steam to select it.
+
+## Shared agent skills
+
+On switch, Home Manager installs skills from `dotfiles/agents/skills/` for OMP,
+Claude Code, Pi, OpenCode, Codex, and Antigravity, unless a skill's `meta.nix`
+restricts its harnesses. Antigravity's App, IDE, and CLI share
+`~/.gemini/config/skills/`. On CrystalHeart, launch the desktop app with
+`antigravity` and view active skills under **Settings → Projects → Customizations**.
 
 ## Docs
 
