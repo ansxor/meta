@@ -50,6 +50,8 @@ nix fmt                       # format with the pinned nixfmt
 mise install                  # other tools in dotfiles/mise (OMP, Pi and Claude Code install themselves)
 ```
 
+Both hosts sign Git commits and tags with the same 1Password SSH key. On macOS, install 1Password in `/Applications` and enable its SSH agent. Remove any legacy `user.signingkey` override from `~/.gitconfig` so Home Manager's key takes effect.
+
 Build without activating:
 
 ```sh

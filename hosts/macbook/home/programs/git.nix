@@ -1,12 +1,13 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
   programs.git = {
     enable = true;
     signing = {
-      key = "60E28B11C5B1F588!";
+      key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKtsAmcwmQ6Oa6Z8nl2n+zM5ML3XZTGAjIVHF6gqgfHq";
       signByDefault = true;
-      format = "openpgp";
+      format = "ssh";
+      signer = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
     };
     settings = {
       user = {
@@ -19,15 +20,6 @@
       credential.helper = "osxkeychain";
       beads.role = "maintainer";
     };
-  };
-
-  programs.gpg.enable = true;
-
-  # GUI passphrase prompt for macOS (git commit/tag signing). Home Manager
-  # runs gpg-agent as a socket-activated launchd user agent with pinentry-mac.
-  services.gpg-agent = {
-    enable = true;
-    pinentry.package = pkgs.pinentry_mac;
   };
 
   programs.gh = {
