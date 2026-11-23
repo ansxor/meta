@@ -1,0 +1,51 @@
+diff --git a/src/plasmaquick/appletpopup.cpp b/src/plasmaquick/appletpopup.cpp
+index edb9c68..5bba74b 100644
+--- a/src/plasmaquick/appletpopup.cpp
++++ b/src/plasmaquick/appletpopup.cpp
+@@ -9,7 +9,9 @@
+ #include <QGuiApplication>
+ #include <QQmlProperty>
+ #include <QSize>
++#include <QTimer>
+ #include <qpa/qplatformwindow.h> // for QWINDOWSIZE_MAX
++#include <wayland-client-core.h>
+ 
+ #include "applet.h"
+ #include "appletquickitem.h"
+@@ -137,17 +139,30 @@ void AppletPopup::setAppletInterface(QQuickItem *appletInterface)
+ 
+ void AppletPopup::hideEvent(QHideEvent *event)
+ {
+-    // Persist the size if this contains an applet
++    PopupPlasmaWindow::hideEvent(event);
++
++    // Flush Wayland surface unmap immediately instead of waiting for the event loop to go idle.
++    if (auto *waylandApp = qGuiApp->nativeInterface<QNativeInterface::QWaylandApplication>()) {
++        if (auto *display = waylandApp->display()) {
++            wl_display_flush(display);
++        }
++    }
++
++    // Persist the size only when it actually changed, and defer disk sync off the hide path
+     if (m_appletInterface) {
+         KConfigGroup config = m_appletInterface->applet()->config();
+         // save size without margins, so we're robust against theme changes
+         const QSize popupSize = size().shrunkBy(padding());
+-        config.writeEntry("popupWidth", popupSize.width());
+-        config.writeEntry("popupHeight", popupSize.height());
+-        config.sync();
++        if (config.readEntry("popupWidth", 0) != popupSize.width() || config.readEntry("popupHeight", 0) != popupSize.height()) {
++            config.writeEntry("popupWidth", popupSize.width());
++            config.writeEntry("popupHeight", popupSize.height());
++            QTimer::singleShot(0, this, [this]() {
++                if (m_appletInterface && m_appletInterface->applet()) {
++                    m_appletInterface->applet()->config().sync();
++                }
++            });
++        }
+     }
+-
+-    PopupPlasmaWindow::hideEvent(event);
+ }
+ 
+ void AppletPopup::onMainItemChanged()

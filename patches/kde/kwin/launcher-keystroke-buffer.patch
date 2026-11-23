@@ -1,0 +1,418 @@
+diff --git a/src/globalshortcuts.cpp b/src/globalshortcuts.cpp
+index 4a11f1e..19bad9b 100644
+--- a/src/globalshortcuts.cpp
++++ b/src/globalshortcuts.cpp
+@@ -28,6 +28,58 @@
+ namespace KWin
+ {
+ 
++#if KWIN_BUILD_GLOBALSHORTCUTS
++namespace
++{
++bool s_pressingModifierOnly = false;
++Qt::KeyboardModifiers s_modifierOnlyMods = Qt::NoModifier;
++std::function<void()> s_onLauncherShortcut;
++std::function<void()> s_onOtherShortcut;
++
++Qt::KeyboardModifiers modifierForKey(int key)
++{
++    switch (key) {
++    case Qt::Key_Meta:
++    case Qt::Key_Super_L:
++    case Qt::Key_Super_R:
++        return Qt::MetaModifier;
++    case Qt::Key_Shift:
++        return Qt::ShiftModifier;
++    case Qt::Key_Control:
++        return Qt::ControlModifier;
++    case Qt::Key_Alt:
++        return Qt::AltModifier;
++    default:
++        return Qt::NoModifier;
++    }
++}
++
++bool isLauncherShortcut(KGlobalAccelD *kglobalAccel, const QKeySequence &sequence)
++{
++    if (!kglobalAccel || sequence.isEmpty()) {
++        return false;
++    }
++    const QStringList action = kglobalAccel->actionList(sequence);
++    if (action.size() < 2) {
++        return false;
++    }
++    if (action[0] == QLatin1StringView("plasmashell") && action[1] == QLatin1StringView("activate application launcher")) {
++        return true;
++    }
++    if (action[0] == QLatin1StringView("org.kde.krunner.desktop") && action[1] == QLatin1StringView("_launch")) {
++        return true;
++    }
++    return false;
++}
++}
++
++void setLauncherShortcutCallbacks(std::function<void()> onLauncher, std::function<void()> onOther)
++{
++    s_onLauncherShortcut = std::move(onLauncher);
++    s_onOtherShortcut = std::move(onOther);
++}
++#endif
++
+ GlobalShortcut::GlobalShortcut(Shortcut &&sc, QAction *action)
+     : m_shortcut(sc)
+     , m_action(action)
+@@ -89,6 +141,10 @@ GlobalShortcutsManager::GlobalShortcutsManager(QObject *parent)
+ 
+ GlobalShortcutsManager::~GlobalShortcutsManager()
+ {
++#if KWIN_BUILD_GLOBALSHORTCUTS
++    s_pressingModifierOnly = false;
++    s_modifierOnlyMods = Qt::NoModifier;
++#endif
+ }
+ 
+ void GlobalShortcutsManager::init()
+@@ -188,14 +244,59 @@ bool GlobalShortcutsManager::processKey(Qt::KeyboardModifiers mods, int keyQt, K
+         return false;
+     }
+ 
++    const Qt::KeyboardModifiers keyMod = modifierForKey(keyQt);
++    if (keyMod != Qt::NoModifier) {
++        if (state == KWin::KeyboardKeyState::Released) {
++            const bool triggeredModifierOnly = s_pressingModifierOnly;
++            const Qt::KeyboardModifiers triggeredMods = s_modifierOnlyMods;
++            s_pressingModifierOnly = false;
++            s_modifierOnlyMods = mods & ~keyMod;
++            const bool ret = m_kglobalAccel->keyEvent(int(mods) | keyQt, ShortcutKeyState::Released);
++            if (triggeredModifierOnly && triggeredMods != Qt::NoModifier) {
++                if (isLauncherShortcut(m_kglobalAccel.get(), QKeySequence(int(triggeredMods)))) {
++                    if (s_onLauncherShortcut) {
++                        s_onLauncherShortcut();
++                    }
++                } else if (!m_kglobalAccel->actionList(QKeySequence(int(triggeredMods))).isEmpty()) {
++                    if (s_onOtherShortcut) {
++                        s_onOtherShortcut();
++                    }
++                }
++            }
++            return ret;
++        } else {
++            s_pressingModifierOnly = true;
++            s_modifierOnlyMods = keyMod | mods;
++            return m_kglobalAccel->keyEvent(int(mods) | keyQt,
++                                            state == KWin::KeyboardKeyState::Pressed ? ShortcutKeyState::Pressed : ShortcutKeyState::Repeated);
++        }
++    }
++
++    s_pressingModifierOnly = false;
++    s_modifierOnlyMods = Qt::NoModifier;
++
++    bool ret = false;
+     switch (state) {
+     case KWin::KeyboardKeyState::Pressed:
+-        return m_kglobalAccel->keyEvent(int(mods) | keyQt, ShortcutKeyState::Pressed);
++        ret = m_kglobalAccel->keyEvent(int(mods) | keyQt, ShortcutKeyState::Pressed);
++        break;
+     case KWin::KeyboardKeyState::Repeated:
+-        return m_kglobalAccel->keyEvent(int(mods) | keyQt, ShortcutKeyState::Repeated);
++        ret = m_kglobalAccel->keyEvent(int(mods) | keyQt, ShortcutKeyState::Repeated);
++        break;
+     case KWin::KeyboardKeyState::Released:
+-        return m_kglobalAccel->keyEvent(int(mods) | keyQt, ShortcutKeyState::Released);
++        ret = m_kglobalAccel->keyEvent(int(mods) | keyQt, ShortcutKeyState::Released);
++        break;
++    }
++    if (ret && state == KWin::KeyboardKeyState::Pressed) {
++        if (isLauncherShortcut(m_kglobalAccel.get(), QKeySequence(int(mods) | keyQt))) {
++            if (s_onLauncherShortcut) {
++                s_onLauncherShortcut();
++            }
++        } else if (s_onOtherShortcut) {
++            s_onOtherShortcut();
++        }
+     }
++    return ret;
+ #endif
+     return false;
+ }
+@@ -219,6 +320,8 @@ bool GlobalShortcutsManager::processPointerPressed(Qt::KeyboardModifiers mods, Q
+ #if KWIN_BUILD_GLOBALSHORTCUTS
+     // currently only used to better support modifier only shortcuts
+     // modifier-only shortcuts are not triggered if a pointer button is pressed
++    s_pressingModifierOnly = false;
++    s_modifierOnlyMods = Qt::NoModifier;
+     if (m_kglobalAccel) {
+         m_kglobalAccel->pointerPressed(pointerButtons);
+     }
+@@ -235,6 +338,8 @@ bool GlobalShortcutsManager::processAxis(Qt::KeyboardModifiers mods, PointerAxis
+ #if KWIN_BUILD_GLOBALSHORTCUTS
+     // currently only used to better support modifier only shortcuts
+     // modifier-only shortcuts are not triggered if a pointer axis is used
++    s_pressingModifierOnly = false;
++    s_modifierOnlyMods = Qt::NoModifier;
+     if (m_kglobalAccel) {
+         m_kglobalAccel->axisTriggered(axis);
+     }
+@@ -306,6 +411,8 @@ void GlobalShortcutsManager::processPinchEnd()
+ void GlobalShortcutsManager::cancelModiferOnlySequence()
+ {
+ #if KWIN_BUILD_GLOBALSHORTCUTS
++    s_pressingModifierOnly = false;
++    s_modifierOnlyMods = Qt::NoModifier;
+     if (m_kglobalAccel) {
+         m_kglobalAccel->resetModifierOnlyState();
+     }
+diff --git a/src/input.cpp b/src/input.cpp
+index 74d63fd..5d77834 100644
+--- a/src/input.cpp
++++ b/src/input.cpp
+@@ -74,6 +74,7 @@
+ 
+ #include "osd.h"
+ #include "wayland/xdgshell.h"
++#include "xdgshellwindow.h"
+ #include <cmath>
+ #include <linux/input.h>
+ 
+@@ -1291,6 +1292,229 @@ private:
+ 
+     QTimer m_powerDown;
+ };
++
++void setLauncherShortcutCallbacks(std::function<void()> onLauncher, std::function<void()> onOther);
++
++/**
++ * Buffers keyboard events between a global launcher shortcut firing and the
++ * launcher window activating, then replays them cleanly to the launcher surface.
++ * Prevents fast post-Meta typing from leaking into the previously focused window.
++ */
++class LauncherKeyBufferFilter : public QObject, public InputEventFilter
++{
++    Q_OBJECT
++
++public:
++    explicit LauncherKeyBufferFilter(QObject *parent = nullptr)
++        : QObject(parent)
++        , InputEventFilter(InputFilterOrder::GlobalShortcut)
++    {
++        m_timeout.setSingleShot(true);
++        m_timeout.setInterval(1000ms);
++        connect(&m_timeout, &QTimer::timeout, this, &LauncherKeyBufferFilter::onTimeout);
++
++        setLauncherShortcutCallbacks([this] {
++            arm();
++        }, [this] {
++            cancel();
++        });
++        connect(workspace(), &Workspace::windowActivated, this, &LauncherKeyBufferFilter::onWindowActivated);
++#if KWIN_BUILD_SCREENLOCKER
++        if (kwinApp()->supportsLockScreen()) {
++            connect(ScreenLocker::KSldApp::self(), &ScreenLocker::KSldApp::lockStateChanged, this, &LauncherKeyBufferFilter::cancel);
++        }
++#endif
++    }
++
++    ~LauncherKeyBufferFilter() override
++    {
++        setLauncherShortcutCallbacks({}, {});
++    }
++
++    bool pointerButton(PointerButtonEvent *event) override
++    {
++        if (m_buffering && event->state == PointerButtonState::Pressed) {
++            cancel();
++        }
++        return false;
++    }
++
++    bool keyboardKey(KeyboardKeyEvent *event) override
++    {
++        if (!m_buffering) {
++            return false;
++        }
++
++        if (event->state == KeyboardKeyState::Pressed) {
++            m_bufferedPressedKeys.insert(event->nativeScanCode);
++            input()->keyboard()->addFilteredKey(event->nativeScanCode);
++            recordEvent(event);
++            return true;
++        }
++
++        if (!m_bufferedPressedKeys.contains(event->nativeScanCode)) {
++            // Release/repeat for a key pressed before the launcher shortcut (e.g. Meta or Alt+F1);
++            // let it pass through so the previous client does not get a stuck key.
++            return false;
++        }
++
++        if (event->state == KeyboardKeyState::Released) {
++            m_bufferedPressedKeys.remove(event->nativeScanCode);
++        }
++        recordEvent(event);
++        return true;
++    }
++
++private:
++    struct BufferedKeyEvent
++    {
++        uint32_t scanCode = 0;
++        KeyboardKeyState state = KeyboardKeyState::Pressed;
++        std::chrono::microseconds timestamp = std::chrono::microseconds::zero();
++        uint32_t modsDepressed = 0;
++        uint32_t modsLatched = 0;
++        uint32_t modsLocked = 0;
++        uint32_t group = 0;
++    };
++
++    void recordEvent(KeyboardKeyEvent *event)
++    {
++        const Xkb *xkb = input()->keyboard()->xkb();
++        const auto &modState = xkb->modifierState();
++        m_bufferedEvents.append(BufferedKeyEvent{
++            .scanCode = event->nativeScanCode,
++            .state = event->state,
++            .timestamp = event->timestamp,
++            .modsDepressed = modState.depressed,
++            .modsLatched = modState.latched,
++            .modsLocked = modState.locked,
++            .group = xkb->currentLayout(),
++        });
++    }
++
++    void arm()
++    {
++        if (m_buffering) {
++            // Double-tap before the launcher mapped cancels the open; drop buffered keys.
++            cancel();
++            return;
++        }
++        Window *active = workspace()->activeWindow();
++        if (active && (active->isAppletPopup() || active->resourceName() == QLatin1StringView("krunner"))) {
++            // Launcher is already open and focused, so this shortcut closes it.
++            return;
++        }
++        m_previousActiveWindow = active;
++        m_bufferedEvents.clear();
++        m_bufferedPressedKeys.clear();
++        m_buffering = true;
++        m_timeout.start();
++    }
++
++    void cancel()
++    {
++        m_buffering = false;
++        m_timeout.stop();
++        disconnect(m_pongConnection);
++        m_pongConnection = QMetaObject::Connection();
++        m_pendingPongSerial.reset();
++        m_pendingTargetWindow = nullptr;
++        m_previousActiveWindow = nullptr;
++        m_bufferedEvents.clear();
++        m_bufferedPressedKeys.clear();
++    }
++
++    void onTimeout()
++    {
++        if (!m_buffering) {
++            return;
++        }
++        if (m_pendingTargetWindow && m_pendingTargetWindow->surface()) {
++            flushToWindow(m_pendingTargetWindow);
++            return;
++        }
++        cancel();
++    }
++
++    void flushToWindow(Window *window)
++    {
++        if (!m_buffering) {
++            return;
++        }
++        const QList<BufferedKeyEvent> events = std::move(m_bufferedEvents);
++        cancel();
++
++        if (events.isEmpty() || !window || !window->surface()) {
++            return;
++        }
++
++        input()->keyboard()->update();
++        SeatInterface *seat = waylandServer()->seat();
++        if (seat->focusedKeyboardSurface() != window->surface()) {
++            return;
++        }
++
++        for (const BufferedKeyEvent &ev : events) {
++            seat->notifyKeyboardModifiers(ev.modsDepressed, ev.modsLatched, ev.modsLocked, ev.group);
++            seat->setTimestamp(ev.timestamp);
++            seat->notifyKeyboardKey(ev.scanCode, ev.state, waylandServer()->display()->nextSerial());
++        }
++
++        const Xkb *xkb = input()->keyboard()->xkb();
++        const auto &modState = xkb->modifierState();
++        seat->notifyKeyboardModifiers(modState.depressed, modState.latched, modState.locked, xkb->currentLayout());
++    }
++
++    void onWindowActivated(Window *window)
++    {
++        if (!m_buffering) {
++            return;
++        }
++        if (!window || window == m_previousActiveWindow || !window->surface()) {
++            return;
++        }
++        if (m_pendingTargetWindow == window && m_pendingPongSerial.has_value()) {
++            return;
++        }
++
++        input()->keyboard()->update();
++
++        // Wait for an xdg_wm_base ping/pong round-trip before replaying keys.
++        // QtWayland responds to wl_keyboard.enter by sending wl_display.sync and only
++        // posts QWindow::focusInEvent() (establishing QtQuick's activeFocusItem) when
++        // wl_callback.done arrives. Because the client queues wl_display.sync before
++        // xdg_wm_base.pong, replying to the sync happens strictly before pongReceived,
++        // guaranteeing replayed wl_keyboard.key events arrive after focusInEvent().
++        if (auto *toplevel = qobject_cast<XdgToplevelWindow *>(window)) {
++            if (XdgToplevelInterface *iface = toplevel->shellSurface()) {
++                if (XdgSurfaceInterface *xdgSurface = iface->xdgSurface()) {
++                    if (XdgShellInterface *shell = xdgSurface->shell()) {
++                        m_pendingTargetWindow = window;
++                        m_pendingPongSerial = shell->ping(xdgSurface);
++                        disconnect(m_pongConnection);
++                        m_pongConnection = connect(shell, &XdgShellInterface::pongReceived, this, [this](quint32 serial) {
++                            if (m_buffering && m_pendingPongSerial && serial == *m_pendingPongSerial) {
++                                flushToWindow(m_pendingTargetWindow);
++                            }
++                        });
++                        return;
++                    }
++                }
++            }
++        }
++
++        flushToWindow(window);
++    }
++
++    bool m_buffering = false;
++    QPointer<Window> m_previousActiveWindow;
++    QPointer<Window> m_pendingTargetWindow;
++    std::optional<quint32> m_pendingPongSerial;
++    QMetaObject::Connection m_pongConnection;
++    QList<BufferedKeyEvent> m_bufferedEvents;
++    QSet<uint32_t> m_bufferedPressedKeys;
++    QTimer m_timeout;
++};
+ #endif
+ 
+ namespace
+@@ -3193,6 +3417,11 @@ void InputRedirection::setupInputFilters()
+ #endif
+ #if KWIN_BUILD_GLOBALSHORTCUTS
+     if (kwinApp()->supportsGlobalShortcuts()) {
++        // Install LauncherKeyBufferFilter before GlobalShortcutFilter at the same
++        // InputFilterOrder::GlobalShortcut weight: installInputEventFilter uses
++        // std::lower_bound, so GlobalShortcutFilter ends up ordered immediately before
++        // LauncherKeyBufferFilter without changing InputFilterOrder::Order in input.h.
++        installInputEventFilter(new LauncherKeyBufferFilter(this));
+         m_globalShortcutFilter = std::make_unique<GlobalShortcutFilter>();
+         installInputEventFilter(m_globalShortcutFilter.get());
+     }

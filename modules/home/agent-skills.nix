@@ -60,6 +60,13 @@ let
       lsp = "the language server";
       skill = name: "the `$" + name + "` skill";
     };
+    antigravity = {
+      dir = ".gemini/config/skills";
+      spawn = "a subagent";
+      ask = "a direct question to the user";
+      lsp = "the language server";
+      skill = name: "the `${name}` skill";
+    };
   };
 
   skillNames = builtins.attrNames (builtins.readDir root);

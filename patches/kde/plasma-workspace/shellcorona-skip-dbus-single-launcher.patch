@@ -1,0 +1,46 @@
+diff --git a/shell/shellcorona.cpp b/shell/shellcorona.cpp
+index 628bf33..7684748 100644
+--- a/shell/shellcorona.cpp
++++ b/shell/shellcorona.cpp
+@@ -2928,6 +2928,41 @@ void ShellCorona::updateStruts()
+ 
+ void ShellCorona::activateLauncherMenu()
+ {
++    auto isLauncher = [](Plasma::Applet *applet) -> bool {
++        const auto provides = applet->pluginMetaData().value(u"X-Plasma-Provides", QStringList());
++        return provides.contains(QLatin1String("org.kde.plasma.launchermenu"));
++    };
++
++    // Fast path: when all launcher applets live on a single screen, activate synchronously
++    // instead of waiting on an async D-Bus round-trip to KWin's activeOutputName.
++    std::optional<uint> launcherScreen;
++    bool multipleScreens = false;
++    for (auto *cont : containments()) {
++        bool contHasLauncher = isLauncher(cont);
++        if (!contHasLauncher) {
++            const auto applets = cont->applets();
++            for (auto *applet : applets) {
++                if (isLauncher(applet)) {
++                    contHasLauncher = true;
++                    break;
++                }
++            }
++        }
++        if (contHasLauncher) {
++            if (!launcherScreen.has_value()) {
++                launcherScreen = cont->screen();
++            } else if (cont->screen() != *launcherScreen) {
++                multipleScreens = true;
++                break;
++            }
++        }
++    }
++
++    if (launcherScreen.has_value() && !multipleScreens) {
++        activateLauncherMenu(QString());
++        return;
++    }
++
+     auto message = QDBusMessage::createMethodCall(u"org.kde.KWin"_s, u"/KWin"_s, u"org.kde.KWin"_s, u"activeOutputName"_s);
+     auto watcher = new QDBusPendingCallWatcher(QDBusConnection::sessionBus().asyncCall(message));
+     connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, watcher] {

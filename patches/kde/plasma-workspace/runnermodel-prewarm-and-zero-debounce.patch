@@ -1,0 +1,20 @@
+diff --git a/applets/kicker/runnermodel.cpp b/applets/kicker/runnermodel.cpp
+index 73d6f95..64eb7cc 100644
+--- a/applets/kicker/runnermodel.cpp
++++ b/applets/kicker/runnermodel.cpp
+@@ -28,8 +28,14 @@ RunnerModel::RunnerModel(QObject *parent)
+     , m_krunnerConfig(KSharedConfig::openConfig(QStringLiteral("krunnerrc")))
+ {
+     m_queryTimer.setSingleShot(true);
+-    m_queryTimer.setInterval(10ms);
++    m_queryTimer.setInterval(0ms);
+     connect(&m_queryTimer, &QTimer::timeout, this, &RunnerModel::startQuery);
++    // Pre-initialize KRunner models after startup settles so the first search does not stall loading plugins
++    QTimer::singleShot(3000ms, this, [this]() {
++        if (m_models.isEmpty()) {
++            initializeModels();
++        }
++    });
+     const auto readFavorites = [this]() {
+         m_favoritePluginIds = m_krunnerConfig
+                                   ->group(QStringLiteral("Plugins")) //

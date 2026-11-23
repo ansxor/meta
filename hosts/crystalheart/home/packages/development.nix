@@ -15,7 +15,8 @@
     alloy6
     jetbrains-toolbox
 
-    # Agent skill tooling (dotfiles/agents/skills/statechart)
+    # Coding agents and skill tooling
+    antigravity-hub
     (callPackage ../../../../pkgs/statechart/package.nix { })
 
     # Toolchains

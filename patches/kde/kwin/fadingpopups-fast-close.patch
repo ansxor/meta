@@ -1,0 +1,33 @@
+diff --git a/src/plugins/fadingpopups/package/contents/code/main.js b/src/plugins/fadingpopups/package/contents/code/main.js
+index b29cc42..cca7b06 100644
+--- a/src/plugins/fadingpopups/package/contents/code/main.js
++++ b/src/plugins/fadingpopups/package/contents/code/main.js
+@@ -59,8 +59,8 @@ function isPopupWindow(window) {
+ 
+ var fadingPopupsEffect = {
+     loadConfig: function () {
+-        fadingPopupsEffect.fadeInDuration = animationTime(150);
+-        fadingPopupsEffect.fadeOutDuration = animationTime(150) * 4;
++        fadingPopupsEffect.fadeInDuration = animationTime(120);
++        fadingPopupsEffect.fadeOutDuration = animationTime(75);
+     },
+     slotWindowAdded: function (window) {
+         if (effects.hasActiveFullScreenEffect) {
+@@ -77,7 +77,7 @@ var fadingPopupsEffect = {
+         }
+         window.fadeInAnimation = animate({
+             window: window,
+-            curve: QEasingCurve.Linear,
++            curve: QEasingCurve.OutQuad,
+             duration: fadingPopupsEffect.fadeInDuration,
+             type: Effect.Opacity,
+             from: 0.0,
+@@ -99,7 +99,7 @@ var fadingPopupsEffect = {
+         }
+         window.fadeOutAnimation = animate({
+             window: window,
+-            curve: QEasingCurve.OutQuart,
++            curve: QEasingCurve.OutQuad,
+             duration: fadingPopupsEffect.fadeOutDuration,
+             type: Effect.Opacity,
+             from: 1.0,

@@ -1,0 +1,423 @@
+diff --git a/applets/kickoff/ApplicationsPage.qml b/applets/kickoff/ApplicationsPage.qml
+index 0e0fe9e..3a5de3a 100644
+--- a/applets/kickoff/ApplicationsPage.qml
++++ b/applets/kickoff/ApplicationsPage.qml
+@@ -282,8 +282,8 @@ BasePage {
+         }
+         Connections {
+             target: kickoff
+-            function onExpandedChanged() {
+-                if (!kickoff.expanded && kickoff.contentArea.currentItem) {
++            function onCloseReset() {
++                if (!kickoff.expanded && kickoff.contentArea && kickoff.contentArea.currentItem) {
+                     kickoff.contentArea.currentItem.forceActiveFocus()
+                 }
+             }
+diff --git a/applets/kickoff/Footer.qml b/applets/kickoff/Footer.qml
+index 593b5eb..6a98770 100644
+--- a/applets/kickoff/Footer.qml
++++ b/applets/kickoff/Footer.qml
+@@ -119,10 +119,8 @@ PlasmaExtras.PlasmoidHeading {
+ 
+         Connections {
+             target: kickoff
+-            function onExpandedChanged() {
+-                if (!kickoff.expanded) {
+-                    tabBar.currentIndex = 0
+-                }
++            function onCloseReset() {
++                tabBar.currentIndex = 0
+             }
+         }
+ 
+diff --git a/applets/kickoff/FullRepresentation.qml b/applets/kickoff/FullRepresentation.qml
+index f3b7031..9f80da2 100644
+--- a/applets/kickoff/FullRepresentation.qml
++++ b/applets/kickoff/FullRepresentation.qml
+@@ -96,67 +96,67 @@ EmptyPage {
+             objectName: "normalPage"
+         }
+ 
+-        Component {
+-            id: searchViewComponent
+-            KickoffListView {
+-                id: searchView
+-                objectName: "searchView"
+-                mainContentView: true
+-                // Forces the function be re-run every time runnerModel.count changes.
+-                // This is absolutely necessary to make the search view work reliably.
+-                model: kickoff.runnerModel.count ? kickoff.runnerModel.modelForRow(0) : null
+-                delegate: KickoffListDelegate {
+-                    width: view.availableWidth
+-                    isSearchResult: true
+-                }
+-                section.property: "group"
+-                activeFocusOnTab: true
+-                Keys.onTabPressed: event => {
+-                    kickoff.firstHeaderItem.forceActiveFocus(Qt.TabFocusReason);
+-                }
+-                Keys.onBacktabPressed: event => {
+-                    kickoff.lastHeaderItem.forceActiveFocus(Qt.BacktabFocusReason);
+-                }
+-                Keys.onUpPressed: event => {
+-                    kickoff.searchField.forceActiveFocus(Qt.BacktabFocusReason)
+-                }
+-                T.StackView.onStatusChanged: {
+-                    if (T.StackView.status === T.StackView.Activating || T.StackView.status === T.StackView.Activating) {
+-                        kickoff.sideBar = null
+-                        kickoff.contentArea = searchView
+-                    }
++        // Not using a component to prevent it from being destroyed
++        KickoffListView {
++            id: searchView
++            objectName: "searchView"
++            visible: false
++            mainContentView: true
++            isSearchView: true
++            // Forces the function be re-run every time runnerModel.count changes.
++            // This is absolutely necessary to make the search view work reliably.
++            model: kickoff.runnerModel.count ? kickoff.runnerModel.modelForRow(0) : null
++            delegate: KickoffListDelegate {
++                width: view.availableWidth
++                isSearchResult: true
++            }
++            section.property: "group"
++            activeFocusOnTab: true
++            Keys.onTabPressed: event => {
++                kickoff.firstHeaderItem.forceActiveFocus(Qt.TabFocusReason);
++            }
++            Keys.onBacktabPressed: event => {
++                kickoff.lastHeaderItem.forceActiveFocus(Qt.BacktabFocusReason);
++            }
++            Keys.onUpPressed: event => {
++                kickoff.searchField.forceActiveFocus(Qt.BacktabFocusReason)
++            }
++            T.StackView.onStatusChanged: {
++                if (T.StackView.status === T.StackView.Activating || T.StackView.status === T.StackView.Active) {
++                    kickoff.sideBar = null
++                    kickoff.contentArea = searchView
+                 }
++            }
+ 
+-                Loader {
+-                    anchors.centerIn: searchView.view
+-                    width: searchView.view.width - (Kirigami.Units.gridUnit * 4)
++            Loader {
++                anchors.centerIn: searchView.view
++                width: searchView.view.width - (Kirigami.Units.gridUnit * 4)
+ 
+-                    active: searchView.view.count === 0
+-                    visible: active
+-                    asynchronous: true
++                active: searchView.visible && searchView.view.count === 0
++                visible: active
++                asynchronous: true
+ 
+-                    sourceComponent: PlasmaExtras.PlaceholderMessage {
+-                        id: emptyHint
++                sourceComponent: PlasmaExtras.PlaceholderMessage {
++                    id: emptyHint
+ 
+-                        iconName: "edit-none"
+-                        opacity: 0
+-                        text: i18nc("@info:status", "No matches")
++                    iconName: "edit-none"
++                    opacity: 0
++                    text: i18nc("@info:status", "No matches")
+ 
+-                        Connections {
+-                            target: kickoff.runnerModel
+-                            function onQueryFinished() {
+-                                showAnimation.restart()
+-                            }
++                    Connections {
++                        target: kickoff.runnerModel
++                        function onQueryFinished() {
++                            showAnimation.restart()
+                         }
++                    }
+ 
+-                        NumberAnimation {
+-                            id: showAnimation
+-                            duration: Kirigami.Units.longDuration
+-                            easing.type: Easing.OutCubic
+-                            property: "opacity"
+-                            target: emptyHint
+-                            to: 1
+-                        }
++                    NumberAnimation {
++                        id: showAnimation
++                        duration: Kirigami.Units.longDuration
++                        easing.type: Easing.OutCubic
++                        property: "opacity"
++                        target: emptyHint
++                        to: 1
+                     }
+                 }
+             }
+@@ -164,11 +164,9 @@ EmptyPage {
+ 
+         Connections {
+             target: kickoff
+-            function onExpandedChanged() {
+-                if (!kickoff.expanded) {
+-                    root.blockingHoverFocus = true
+-                    root.interceptedPosition = null
+-                }
++            function onCloseReset() {
++                root.blockingHoverFocus = true
++                root.interceptedPosition = null
+             }
+         }
+ 
+@@ -206,14 +204,12 @@ EmptyPage {
+             function onSearchTextChanged() {
+                 if ((root.header as Header).searchText.length === 0 &&
+                     contentItemStackView.currentItem.objectName !== "normalPage") {
+-                    contentItemStackView.reverseTransitions = true
+-                    contentItemStackView.replace(normalPage)
++                    contentItemStackView.replace(null, normalPage, {}, T.StackView.Immediate)
+                 } else if ((root.header as Header).searchText.length > 0) {
+                     if (contentItemStackView.currentItem.objectName !== "searchView") {
+-                        contentItemStackView.reverseTransitions = false
+-                        contentItemStackView.replace(searchViewComponent)
++                        contentItemStackView.replace(null, searchView, {}, T.StackView.Immediate)
+                     } else {
+-                        contentItemStackView.contentItem.currentIndex = 0
++                        searchView.currentIndex = 0
+                     }
+                 }
+                 root.blockingHoverFocus = true
+diff --git a/applets/kickoff/Header.qml b/applets/kickoff/Header.qml
+index c938557..a2fa202 100644
+--- a/applets/kickoff/Header.qml
++++ b/applets/kickoff/Header.qml
+@@ -200,10 +200,8 @@ PlasmaExtras.PlasmoidHeading {
+                     }
+                     Connections {
+                         target: kickoff
+-                        function onExpandedChanged() {
+-                            if (!kickoff.expanded) {
+-                                searchField.clear()
+-                            }
++                        function onCloseReset() {
++                            searchField.clear()
+                         }
+                     }
+                     onTextEdited: {
+diff --git a/applets/kickoff/KickoffGridView.qml b/applets/kickoff/KickoffGridView.qml
+index 0079793..05563a2 100644
+--- a/applets/kickoff/KickoffGridView.qml
++++ b/applets/kickoff/KickoffGridView.qml
+@@ -187,11 +187,9 @@ EmptyPage {
+ 
+         Connections {
+             target: kickoff
+-            function onExpandedChanged() {
+-                if (!kickoff.expanded) {
+-                    view.currentIndex = 0
+-                    view.positionViewAtBeginning()
+-                }
++            function onCloseReset() {
++                view.currentIndex = 0
++                view.positionViewAtBeginning()
+             }
+         }
+ 
+diff --git a/applets/kickoff/KickoffListView.qml b/applets/kickoff/KickoffListView.qml
+index 5c321c7..2d27f35 100644
+--- a/applets/kickoff/KickoffListView.qml
++++ b/applets/kickoff/KickoffListView.qml
+@@ -36,6 +36,8 @@ EmptyPage {
+ 
+     property bool mainContentView: false
+     property bool hasSectionView: false
++    property bool isSearchView: false
++    property bool hasCurrentQueryMatches: false
+ 
+     /**
+      * Request showing the section view
+@@ -199,23 +201,45 @@ EmptyPage {
+ 
+         Connections {
+             target: kickoff
+-            function onExpandedChanged() {
+-                if (!kickoff.expanded) {
+-                    view.currentIndex = 0
+-                    view.positionViewAtBeginning()
+-                }
++            function onCloseReset() {
++                view.currentIndex = 0
++                view.positionViewAtBeginning()
+             }
+         }
+ 
+         Connections {
+             target: kickoff.runnerModel
+-            enabled: launchMatchTimer.running
++            enabled: root.isSearchView
++            function onQueryChanged() : void {
++                root.hasCurrentQueryMatches = false
++            }
+             function onQueryFinished() : void {
+-                launchMatchTimer.stop()
+-                Qt.callLater(launchMatchTimer.triggered) // callLater to give bindings time to update
++                if (launchMatchTimer.running) {
++                    launchMatchTimer.stop()
++                    Qt.callLater(launchMatchTimer.triggered) // callLater to give bindings time to update
++                }
+             }
+         }
+ 
++        function markMatchesUpdated() : void {
++            if (view.count > 0) {
++                root.hasCurrentQueryMatches = true
++                if (launchMatchTimer.running) {
++                    launchMatchTimer.stop()
++                    Qt.callLater(launchMatchTimer.triggered)
++                }
++            }
++        }
++
++        Connections {
++            target: view.model
++            enabled: root.isSearchView && view.model !== null
++            function onRowsInserted() : void { view.markMatchesUpdated() }
++            function onRowsRemoved() : void { view.markMatchesUpdated() }
++            function onDataChanged() : void { view.markMatchesUpdated() }
++            function onModelReset() : void { view.markMatchesUpdated() }
++        }
++
+         // Used to block hover events temporarily after using keyboard navigation.
+         // If you have one hand on the touch pad or mouse and another hand on the keyboard,
+         // it's easy to accidentally reset the highlight/focus position to the mouse position.
+@@ -236,7 +260,7 @@ EmptyPage {
+             interval: 750
+             onTriggered: {
+                 view.currentItem?.action.trigger();
+-                currentItem.forceActiveFocus(Qt.ShortcutFocusReason);
++                view.currentItem?.forceActiveFocus(Qt.ShortcutFocusReason);
+             }
+         }
+ 
+@@ -330,7 +354,7 @@ EmptyPage {
+                         if (launchMatchTimer.running) {
+                             launchMatchTimer.stop()
+                             launchMatchTimer.triggered()
+-                        } else if (!kickoff.runnerModel.querying || view.currentItem?.text.toLowerCase().includes(kickoff.runnerModel.query.toLowerCase())) {
++                        } else if (!root.isSearchView || !kickoff.runnerModel.querying || root.hasCurrentQueryMatches || view.currentItem?.text.toLowerCase().includes(kickoff.runnerModel.query.toLowerCase())) {
+                             launchMatchTimer.triggered()
+                         } else {
+                             launchMatchTimer.start()
+diff --git a/applets/kickoff/main.qml b/applets/kickoff/main.qml
+index 6b6c95d..080ca0d 100644
+--- a/applets/kickoff/main.qml
++++ b/applets/kickoff/main.qml
+@@ -186,6 +186,32 @@ PlasmoidItem {
+ 
+     Plasmoid.icon: Plasmoid.configuration.icon
+ 
++    // Defer collapse-time view/search teardown until after Wayland unmap is flushed.
++    signal closeReset()
++    property bool pendingCloseReset: false
++
++    Timer {
++        id: closeResetTimer
++        interval: 24
++        onTriggered: {
++            if (!kickoff.expanded && kickoff.pendingCloseReset) {
++                kickoff.pendingCloseReset = false
++                kickoff.closeReset()
++            }
++        }
++    }
++
++    onExpandedChanged: {
++        if (!expanded) {
++            pendingCloseReset = true
++            closeResetTimer.restart()
++        } else if (pendingCloseReset) {
++            closeResetTimer.stop()
++            pendingCloseReset = false
++            closeReset()
++        }
++    }
++
+     preferredRepresentation: compactRepresentation
+ 
+     fullRepresentation: FullRepresentation { focus: true }
+@@ -254,8 +280,13 @@ PlasmoidItem {
+         Accessible.name: Plasmoid.title
+         Accessible.role: Accessible.Button
+ 
+-        onPressed: wasExpanded = kickoff.expanded
+-        onClicked: kickoff.expanded = !wasExpanded
++        onPressed: mouse => {
++            if (mouse.button !== Qt.LeftButton) {
++                return
++            }
++            wasExpanded = kickoff.expanded
++            kickoff.expanded = !wasExpanded
++        }
+ 
+         DropArea {
+             id: compactDragArea
+diff --git a/desktoppackage/contents/applet/CompactApplet.qml b/desktoppackage/contents/applet/CompactApplet.qml
+index 1aba2a5..e2bac4c 100644
+--- a/desktoppackage/contents/applet/CompactApplet.qml
++++ b/desktoppackage/contents/applet/CompactApplet.qml
+@@ -162,10 +162,22 @@ PlasmaCore.ToolTipArea {
+ 
+     Timer {
+         id: expandedSync
+-        interval: 100
++        interval: 50
+         onTriggered: root.plasmoidItem.expanded = dialog.visible;
+     }
+ 
++    // Defer the QTBUG-146992 item-tree disable until after the Wayland unmap is sent,
++    // avoiding a synchronous full-subtree disable walk on the close critical path.
++    Timer {
++        id: disableOnHideTimer
++        interval: 16
++        onTriggered: {
++            if (!dialog.visible) {
++                appletParent.enabled = false;
++            }
++        }
++    }
++
+     Connections {
+         target: Plasmoid.internalAction("configure")
+         function onTriggered() {
+@@ -223,9 +235,20 @@ PlasmaCore.ToolTipArea {
+ 
+         onVisibleChanged: {
+             if (!visible) {
+-                expandedSync.restart();
++                disableOnHideTimer.restart();
++                if (root.containsMouse && root.plasmoidItem.expanded) {
++                    // Defer briefly only when hiding via focus loss while clicking the panel button,
++                    // so the compact MouseArea's onPressed still observes wasExpanded === true.
++                    expandedSync.restart();
++                } else {
++                    expandedSync.stop();
++                    root.plasmoidItem.expanded = false;
++                }
+                 Plasmoid.status = oldStatus;
+             } else {
++                disableOnHideTimer.stop();
++                appletParent.enabled = true;
++                expandedSync.stop();
+                 oldStatus = Plasmoid.status;
+                 Plasmoid.status = PlasmaCore.Types.RequiresAttentionStatus;
+                 // This call currently fails and complains at runtime:
+@@ -243,7 +266,7 @@ PlasmaCore.ToolTipArea {
+             // Workaround for QTBUG-146992
+             // https://qt-project.atlassian.net/browse/QTBUG-146992
+             // https://codereview.qt-project.org/c/qt/qtbase/+/738776
+-            enabled: dialog.visible
++            enabled: false
+             
+             Keys.onEscapePressed: {
+                 root.plasmoidItem.expanded = false;

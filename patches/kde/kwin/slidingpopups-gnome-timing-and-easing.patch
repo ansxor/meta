@@ -1,0 +1,86 @@
+diff --git a/src/plugins/slidingpopups/slidingpopups.cpp b/src/plugins/slidingpopups/slidingpopups.cpp
+index f05aeb3..5832749 100644
+--- a/src/plugins/slidingpopups/slidingpopups.cpp
++++ b/src/plugins/slidingpopups/slidingpopups.cpp
+@@ -23,6 +23,8 @@
+ #include <QTimer>
+ #include <QWindow>
+ 
++#include <cmath>
++
+ #include <KWindowEffects>
+ 
+ Q_DECLARE_METATYPE(KWindowEffects::SlideFromLocation)
+@@ -93,9 +95,9 @@ bool SlidingPopupsEffect::supported()
+ void SlidingPopupsEffect::reconfigure(ReconfigureFlags flags)
+ {
+     SlidingPopupsConfig::self()->read();
+-    // Keep these durations in sync with the value of Kirigami.Units.longDuration
+-    m_slideInDuration = animationTime(SlidingPopupsConfig::slideInTime() != 0 ? std::chrono::milliseconds(SlidingPopupsConfig::slideInTime()) : 200ms);
+-    m_slideOutDuration = animationTime(SlidingPopupsConfig::slideOutTime() != 0 ? std::chrono::milliseconds(SlidingPopupsConfig::slideOutTime()) : 200ms);
++    // Match GNOME BoxPointer POPUP_ANIMATION_TIME (150ms in, crisp 75ms out)
++    m_slideInDuration = animationTime(SlidingPopupsConfig::slideInTime() != 0 ? std::chrono::milliseconds(SlidingPopupsConfig::slideInTime()) : 150ms);
++    m_slideOutDuration = animationTime(SlidingPopupsConfig::slideOutTime() != 0 ? std::chrono::milliseconds(SlidingPopupsConfig::slideOutTime()) : 75ms);
+ 
+     for (auto &[window, animation] : m_animations) {
+         animation.timeLine.setDuration(animation.kind == AnimationKind::In ? m_slideInDuration : m_slideOutDuration);
+@@ -442,17 +444,22 @@ void SlidingPopupsEffect::slideIn(EffectWindow *w)
+         return;
+     }
+ 
++    const auto existingIt = m_animations.find(w);
++    const bool reversing = existingIt != m_animations.end() && existingIt->second.kind == AnimationKind::Out && !existingIt->second.timeLine.done();
++    const qreal previousValue = reversing ? std::clamp(existingIt->second.timeLine.value(), 0.0, 1.0) : 0.0;
++
+     Animation &animation = m_animations[w];
+     animation.kind = AnimationKind::In;
+     animation.timeLine.setDirection(TimeLine::Forward);
+     animation.timeLine.setDuration((*dataIt).slideInDuration);
+-    animation.timeLine.setEasingCurve(QEasingCurve::OutCubic);
++    animation.timeLine.setEasingCurve(QEasingCurve::OutQuad);
+     animation.windowEffect = ItemEffect(w->windowItem());
+ 
+-    // If the opposite animation (Out) was active and it had shorter duration,
+-    // at this point, the timeline can end up in the "done" state. Thus, we have
+-    // to reset it.
+-    if (animation.timeLine.done()) {
++    if (reversing) {
++        // OutQuad(p) = 1 - (1 - p)^2 => p = 1 - sqrt(1 - v)
++        const qreal progress = 1.0 - std::sqrt(1.0 - previousValue);
++        animation.timeLine.setElapsed(std::chrono::milliseconds(std::lround(progress * (*dataIt).slideInDuration.count())));
++    } else if (animation.timeLine.done()) {
+         animation.timeLine.reset();
+     }
+ 
+@@ -478,20 +485,25 @@ void SlidingPopupsEffect::slideOut(EffectWindow *w)
+         return;
+     }
+ 
++    const auto existingIt = m_animations.find(w);
++    const bool reversing = existingIt != m_animations.end() && existingIt->second.kind == AnimationKind::In && !existingIt->second.timeLine.done();
++    const qreal previousValue = reversing ? std::clamp(existingIt->second.timeLine.value(), 0.0, 1.0) : 1.0;
++
+     Animation &animation = m_animations[w];
+     animation.deletedRef = EffectWindowDeletedRef(w);
+     animation.visibleRef = EffectWindowVisibleRef(w, EffectWindow::PAINT_DISABLED);
+     animation.kind = AnimationKind::Out;
+     animation.timeLine.setDirection(TimeLine::Backward);
+     animation.timeLine.setDuration((*dataIt).slideOutDuration);
+-    // this is effectively InCubic because the direction is reversed
+-    animation.timeLine.setEasingCurve(QEasingCurve::OutCubic);
++    // TimeLine::Backward evaluates easing(1 - t), so InQuad produces OutQuad ease-out on close (matching GNOME BoxPointer)
++    animation.timeLine.setEasingCurve(QEasingCurve::InQuad);
+     animation.windowEffect = ItemEffect(w->windowItem());
+ 
+-    // If the opposite animation (In) was active and it had shorter duration,
+-    // at this point, the timeline can end up in the "done" state. Thus, we have
+-    // to reset it.
+-    if (animation.timeLine.done()) {
++    if (reversing) {
++        // Backward InQuad(1 - p) = (1 - p)^2 => p = 1 - sqrt(v)
++        const qreal progress = 1.0 - std::sqrt(previousValue);
++        animation.timeLine.setElapsed(std::chrono::milliseconds(std::lround(progress * (*dataIt).slideOutDuration.count())));
++    } else if (animation.timeLine.done()) {
+         animation.timeLine.reset();
+     }
+ 

@@ -26,7 +26,7 @@ hosts/macbook/
 modules/nixos/
   common.nix                  # users, locale, nix daemon, nix-ld
   boot.nix                    # GRUB, Zen kernel, zram, snapshots
-  desktop.nix                 # GNOME, GSConnect
+  desktop.nix                 # Plasma (default), GNOME, GDM, GSConnect
   services.nix                # NetworkManager, Tailscale, Mullvad, Flatpak
   gaming.nix                  # Steam, WiVRn, Logitech wheel driver
   game-handoff.nix            # game-handoff service
@@ -62,6 +62,12 @@ nix build .#darwinConfigurations.macbook.system -o result-system
 
 New files must be tracked by git (`git add -N <file>`): the flake is evaluated
 from the git tree and ignores untracked files.
+
+Shared agent skills live in `dotfiles/agents/skills/`. Home Manager installs
+new skill directories for OMP, Claude Code, Pi, OpenCode, Codex, and Antigravity
+on switch, unless a skill's `meta.nix` restricts its harnesses. Antigravity reads
+them from `~/.gemini/config/skills/`. On CrystalHeart, launch the desktop app
+with `antigravity` and view active skills under **Settings → Projects → Customizations**.
 
 LearnHarness applies a local GPT-6.2 Sol catalog patch to the upstream AppImage
 at build time. The ChatGPT picker still only shows models reported by the

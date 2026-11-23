@@ -1,0 +1,71 @@
+diff --git a/src/runnermanager.cpp b/src/runnermanager.cpp
+index 4224c26..1971844 100644
+--- a/src/runnermanager.cpp
++++ b/src/runnermanager.cpp
+@@ -56,6 +56,10 @@ public:
+         lastMatchChangeSignalled.start();
+         QObject::connect(q, &RunnerManager::matchesChanged, q, [&] {
+             lastMatchChangeSignalled.restart();
++            if (!context.query().isEmpty() && !context.matches().isEmpty()) {
++                hasEmittedMatchesForQuery = true;
++                firstMatchTimerArmed = false;
++            }
+         });
+ 
+         if (defaultStatePtr) {
+@@ -68,28 +72,38 @@ public:
+ 
+     void scheduleMatchesChanged()
+     {
+-        // We avoid over-refreshing the client. We only refresh every this much milliseconds
+-        constexpr int refreshPeriod = 250;
++        // Keep the 250ms stall only before clearing to an empty list on a new search so old results
++        // don't flicker away. Once real matches arrive from fast runners (e.g. krunner_services),
++        // flush them after a 1-frame coalesce (~15ms) instead of blocking on slow runners like Baloo.
++        constexpr int emptyClearDelay = 250;
++        constexpr int firstMatchCoalesceDelay = 15;
++        constexpr int subsequentRefreshPeriod = 50;
++
+         // This will tell us if we are reseting the matches to start a new search. RunnerContext::reset() clears its query string for its emission
+         if (context.query().isEmpty()) {
+             matchChangeTimer.stop();
++            hasEmittedMatchesForQuery = false;
++            firstMatchTimerArmed = false;
+             // This actually contains the query string for the new search that we're launching (if any):
+             if (!this->untrimmedTerm.trimmed().isEmpty()) {
+                 // We are starting a new search, we shall stall for some time before deciding to show an empty matches list.
+                 // This stall should be enough for the engine to provide more meaningful result, so we avoid refreshing with
+                 // an empty results list if possible.
+-                matchChangeTimer.start(refreshPeriod);
+-                // We "pretend" that we have refreshed it so the next call will be forced to wait the timeout:
+-                lastMatchChangeSignalled.restart();
++                matchChangeTimer.start(emptyClearDelay);
+             } else {
+                 // We have an empty input string, so it's not a real query. We don't expect any results to come, so no need to stall
+                 Q_EMIT q->matchesChanged(context.matches());
+             }
+-        } else if (lastMatchChangeSignalled.hasExpired(refreshPeriod)) {
++        } else if (!hasEmittedMatchesForQuery) {
++            if (!firstMatchTimerArmed) {
++                firstMatchTimerArmed = true;
++                matchChangeTimer.start(firstMatchCoalesceDelay);
++            }
++        } else if (lastMatchChangeSignalled.hasExpired(subsequentRefreshPeriod)) {
+             matchChangeTimer.stop();
+             Q_EMIT q->matchesChanged(context.matches());
+-        } else {
+-            matchChangeTimer.start(refreshPeriod - lastMatchChangeSignalled.elapsed());
++        } else if (!matchChangeTimer.isActive()) {
++            matchChangeTimer.start(subsequentRefreshPeriod - lastMatchChangeSignalled.elapsed());
+         }
+     }
+ 
+@@ -367,6 +381,8 @@ public:
+     RunnerContext context;
+     QTimer matchChangeTimer;
+     QElapsedTimer lastMatchChangeSignalled;
++    bool hasEmittedMatchesForQuery = false;
++    bool firstMatchTimerArmed = false;
+     QHash<QString, AbstractRunner *> runners;
+     QHash<AbstractRunner *, QString> pendingJobsAfterSuspend;
+     AbstractRunner *currentSingleRunner = nullptr;

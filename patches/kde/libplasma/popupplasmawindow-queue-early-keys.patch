@@ -1,0 +1,72 @@
+diff --git a/src/plasmaquick/popupplasmawindow.cpp b/src/plasmaquick/popupplasmawindow.cpp
+index 3230442..4595afe 100644
+--- a/src/plasmaquick/popupplasmawindow.cpp
++++ b/src/plasmaquick/popupplasmawindow.cpp
+@@ -9,10 +9,13 @@
+ #include <kwindowsystem.h>
+ 
+ #include "debug_p.h"
++#include <QCoreApplication>
+ #include <QGuiApplication>
++#include <QKeyEvent>
+ #include <QScreen>
+ #include <qnamespace.h>
+ #include <qtmetamacros.h>
++#include <vector>
+ 
+ #include "configview.h"
+ #include "containmentview.h"
+@@ -49,6 +52,8 @@ public:
+     Qt::Edge m_popupDirection = Qt::TopEdge;
+     Qt::Edge m_effectivePopupDirection = Qt::TopEdge;
+     Qt::Edges m_nearbyBorders;
++    std::vector<std::unique_ptr<QKeyEvent>> m_pendingKeyEvents;
++    bool m_replayingKeys = false;
+ };
+ 
+ PopupPlasmaWindowPrivate::PopupPlasmaWindowPrivate(PopupPlasmaWindow *_q)
+@@ -456,12 +461,44 @@ void PopupPlasmaWindow::setMargin(int margin)
+ bool PopupPlasmaWindow::event(QEvent *event)
+ {
+     switch (event->type()) {
++    case QEvent::KeyPress:
++    case QEvent::KeyRelease:
++        // If QtWayland delivers key events after wl_keyboard.enter but before the
++        // wl_display.sync round-trip posts FocusIn (so QtQuick has no activeFocusItem yet),
++        // queue them and replay immediately once FocusIn establishes item focus.
++        if (!d->m_replayingKeys && isVisible() && !activeFocusItem()) {
++            if (d->m_pendingKeyEvents.size() < 64) {
++                auto *keyEvent = static_cast<QKeyEvent *>(event);
++                d->m_pendingKeyEvents.emplace_back(static_cast<QKeyEvent *>(keyEvent->clone()));
++            }
++            event->accept();
++            return true;
++        }
++        break;
++    case QEvent::FocusIn: {
++        const bool handled = PlasmaQuick::PlasmaWindow::event(event);
++        if (!d->m_pendingKeyEvents.empty() && activeFocusItem()) {
++            auto pending = std::move(d->m_pendingKeyEvents);
++            d->m_pendingKeyEvents.clear();
++            d->m_replayingKeys = true;
++            for (const auto &ev : pending) {
++                QCoreApplication::sendEvent(this, ev.get());
++            }
++            d->m_replayingKeys = false;
++        }
++        return handled;
++    }
++    case QEvent::Hide:
++    case QEvent::FocusOut:
++        d->m_pendingKeyEvents.clear();
++        break;
+     case QEvent::UpdateRequest:
+         if (d->m_needsReposition) {
+             d->updatePosition();
+         }
+         break;
+     case QEvent::Show:
++        d->m_pendingKeyEvents.clear();
+         d->updatePosition();
+         break;
+     case QEvent::Resize:
